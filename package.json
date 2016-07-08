@@ -1,11 +1,25 @@
 {
   "name": "nimbleforce",
+  "description": "grunt tasks and nimbleforce",
   "version": "0.0.1",
-  "description": "A Nimble Node package for interacting with installations of Nimble AMS",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "author": {
+    "name": "NimbleUser",
+    "email": "jjuby@nimbleuser.com"
   },
-  "author": "NimbleUser",
-  "license": "ISC"
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://bitbucket.org/nimbleams/nimbleforce.git"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.9.2",
+    "grunt-contrib-clean": "^0.5.0",
+    "grunt": "~0.4.5"
+  },
+  "keywords": [
+    "gruntplugin"
+  ]
 }
