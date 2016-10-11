@@ -10,6 +10,13 @@ module.exports = function(grunt) {
   var getNimbleForce = function () {
     return new nimbleforce(constants.username, constants.password, constants.sfUrl);
   };
+  var namespaceJSON = function(rawData) {
+    var namespacedString = JSON.stringify(rawData)
+      .split('NU__').join(constants.nuObjectNamespace)
+      .split('NU.').join(constants.nuClassNamespace)
+      .split('NC__').join(constants.ncNamespace);
+    return JSON.parse(namespacedString);
+  }
 
   grunt.registerTask('data', 'Pass the data file to be synced to the SF org.', function(path) {
     var nimbleConnection = getNimbleForce();
@@ -17,13 +24,8 @@ module.exports = function(grunt) {
       handleError(this.name + " Usage: data:path/to/data/file.json");
     }
     var done = this.async();
-    var rawData = grunt.file.readJSON(path);
 
-    var namespacedString = JSON.stringify(rawData)
-      .split('NU__').join(constants.nuObjectNamespace)
-      .split('NU.').join(constants.nuClassNamespace)
-      .split('NC__').join(constants.ncNamespace);
-    var data = JSON.parse(namespacedString);
+    var data = grunt.file.readJSON(path);
 
     if (data.manifest) {
       //trim the manifest file from the path
@@ -33,7 +35,7 @@ module.exports = function(grunt) {
 
       var fnArray = data.order.map(function(filename) {
         var pathToFile = path + '/' + filename;
-        var thisData = grunt.file.readJSON(pathToFile);
+        var thisData = namespaceJSON(grunt.file.readJSON(pathToFile));
         return function() {
           console.log(filename);
           return nimbleConnection.processData(thisData);
@@ -43,6 +45,7 @@ module.exports = function(grunt) {
         done();
       }, handleError);
     } else {
+      data = namespaceJSON(data);
       nimbleConnection.processData(data).then(function(results) {
         done();
       }, handleError);
@@ -55,13 +58,8 @@ module.exports = function(grunt) {
       handleError(this.name + " Usage: cleanData:path/to/data/file.json");
     }
     var done = this.async();
-    var rawData = grunt.file.readJSON(path);
 
-    var namespacedString = JSON.stringify(rawData)
-      .split('NU__').join(constants.nuObjectNamespace)
-      .split('NU.').join(constants.nuClassNamespace)
-      .split('NC__').join(constants.ncNamespace);
-    var data = JSON.parse(namespacedString);
+    var data = grunt.file.readJSON(path);
 
     if (data.manifest) {
       //trim the manifest file from the path
@@ -72,7 +70,7 @@ module.exports = function(grunt) {
       var reverseFilenames = data.order.reverse();
       var fnArray = reverseFilenames.map(function(filename) {
         var pathToFile = path + '/' + filename;
-        var thisData = grunt.file.readJSON(pathToFile);
+        var thisData = namespaceJSON(grunt.file.readJSON(pathToFile));
         return function() {
           console.log(filename);
           return nimbleConnection.cleanDataFor(thisData.cleaners);
@@ -82,6 +80,7 @@ module.exports = function(grunt) {
         done();
       }, handleError);
     } else {
+      data = namespaceJSON(data);
       nimbleConnection.cleanDataFor(data.cleaners).then(function () {
         done();
       }, handleError);
