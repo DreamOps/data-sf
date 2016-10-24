@@ -1,25 +1,28 @@
-var seq = require('promised-io/promise').seq;
-var nimbleforce = require('../index');
+var containerFactory = require('../src/container-config');
+/**
+ * Task definitions for the data/cleanData tasks.
+ * @param {object} grunt - reference to the grunt configuration object.
+ */
 module.exports = function(grunt) {
 
   var constants = grunt.config.get('nimbleforce');
+  var container = containerFactory({
+    username: constants.username,
+    password: constants.password,
+    url: constants.sfUrl,
+    nuClassNamespace: constants.nuClassNamespace,
+    nuObjectNamespace: constants.nuObjectNamespace,
+    ncObjectNamespace: constants.ncObjectNamespace
+  });
+  var seq = container.get('promise').seq;
+  var dataFileService = container.get('data-file-service');
+  var namespaceJSON = container.get('namespace-service');
 
   var handleError = function (err) {
     grunt.fail.fatal(err);
   };
-  var getNimbleForce = function () {
-    return new nimbleforce(constants.username, constants.password, constants.sfUrl);
-  };
-  var namespaceJSON = function(rawData) {
-    var namespacedString = JSON.stringify(rawData)
-      .split('NU__').join(constants.nuObjectNamespace)
-      .split('NU.').join(constants.nuClassNamespace)
-      .split('NC__').join(constants.ncNamespace);
-    return JSON.parse(namespacedString);
-  }
 
   grunt.registerTask('data', 'Pass the data file to be synced to the SF org.', function(path) {
-    var nimbleConnection = getNimbleForce();
     if (arguments.length === 0) {
       handleError(this.name + " Usage: data:path/to/data/file.json");
     }
@@ -38,7 +41,7 @@ module.exports = function(grunt) {
         var thisData = namespaceJSON(grunt.file.readJSON(pathToFile));
         return function() {
           console.log(filename);
-          return nimbleConnection.processData(thisData);
+          return dataFileService.processData(thisData);
         };
       });
       seq(fnArray).then(function(results) {
@@ -46,14 +49,13 @@ module.exports = function(grunt) {
       }, handleError);
     } else {
       data = namespaceJSON(data);
-      nimbleConnection.processData(data).then(function(results) {
+      dataFileService.processData(data).then(function(results) {
         done();
       }, handleError);
     }
   });
 
   grunt.registerTask('cleanData', 'Pass the data file for cleaning the SF org.', function(path) {
-    var nimbleConnection = getNimbleForce();
     if (arguments.length === 0) {
       handleError(this.name + " Usage: cleanData:path/to/data/file.json");
     }
@@ -73,7 +75,7 @@ module.exports = function(grunt) {
         var thisData = namespaceJSON(grunt.file.readJSON(pathToFile));
         return function() {
           console.log(filename);
-          return nimbleConnection.cleanDataFor(thisData.cleaners);
+          return dataFileService.cleanData(thisData.cleaners);
         };
       });
       seq(fnArray).then(function(results) {
@@ -81,7 +83,7 @@ module.exports = function(grunt) {
       }, handleError);
     } else {
       data = namespaceJSON(data);
-      nimbleConnection.cleanDataFor(data.cleaners).then(function () {
+      dataFileService.cleanData(data.cleaners).then(function () {
         done();
       }, handleError);
     }

@@ -2,19 +2,30 @@
 
 module.exports = function(grunt) {
 
+  grunt.loadNpmTasks('grunt-mocha-test');
+
   // Project configuration.
   grunt.initConfig({
     jshint: {
       all: [
         'Gruntfile.js',
         'tasks/*.js',
-        'index.js'
+        'index.js',
+        'src/*.js',
+        'src/**/*.js'
       ],
       options: {
         jshintrc: '.jshintrc'
       }
     },
-
+    mochaTest: {
+      test: {
+        options: {
+          reporter: 'spec'
+        },
+        src: ['test/**/*.js']
+      }
+    },
     // Before generating any new files, remove any previously-created files.
     clean: {
       tests: ['tmp']
@@ -22,12 +33,12 @@ module.exports = function(grunt) {
 
     // Configuration to be run (and then tested).
     nimbleforce: {
-      username: 'qa-699@nu.dev',
-      password: 'Honor1234',
+      username: 'kzn-210@nu.dev',
+      password: 'Honor210',
       sfUrl: 'https://login.salesforce.com',
       nuClassNamespace: 'NU.',
       nuObjectNamespace: 'NU__',
-      ncNamespace: 'NC__'
+      ncObjectNamespace: 'NC__'
     }
   });
 
@@ -39,6 +50,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
 
   // By default, lint and run all tests.
+  grunt.registerTask('test', 'mochaTest');
   grunt.registerTask('default', ['jshint', 'test']);
 
 };
