@@ -6,6 +6,8 @@
     "name": "NimbleUser",
     "email": "jjuby@nimbleuser.com"
   },
+  "license": "UNLICENSED",
+  "private": true,
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -15,9 +17,17 @@
     "node": ">= 0.8.0"
   },
   "devDependencies": {
-    "grunt-contrib-jshint": "^0.9.2",
-    "grunt-contrib-clean": "^0.5.0",
-    "grunt": "~0.4.5"
+    "chai": "~3.5.0",
+    "grunt": "~0.4.5",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-jshint": "~0.9.2",
+    "grunt-mocha-test": "~0.13.2",
+    "jsforce": "~1.7.0",
+    "kontainer-di": "~0.9.9",
+    "mocha": "~3.1.2",
+    "promised-io": "~0.3.5",
+    "sinon": "~1.17.6",
+    "sinon-as-promised": "~4.0.2"
   },
   "keywords": [
     "gruntplugin"
