@@ -1,16 +1,18 @@
 /**
  * Factory function for environment-service.
- * @param {query-service} query - query-service dependency injection.
+ *
+ * @param {function} query - query-service dependency injection.
  * @param {Promise} promise - promise library dependency injection.
- * @return environment-service
+ * @return {object} environment-service provides functions for building an environment via queries.
  */
 module.exports = function(query, promise) {
   /**
    * Queries data from a SF org and returns a result
    * object for replacing variables.
-   * @param {object} queryObj - An object adhering to this interface:
+   *
+   * @param {object} queryObj - An object adhering to following interface:
    *                            { variable: 'SomeString', query: 'SELECT Id FROM...' }
-   * @return Object adhering to the following interface:
+   * @return {object} Object adhering to the following interface:
    *         { variable: 'SomeString', data: {... query results...} }
    */
   var queryData = function(queryObj) {
@@ -33,9 +35,10 @@ module.exports = function(query, promise) {
    * Resolves with an object, whos keys are all the variable
    * properties, and whose values are represented by the query
    * properties.
+   *
    * @param {array} queryObjects - Array of objects adhering to this interface:
    *                               { variable: 'SomeString', query: 'SELECT Id FROM...' }
-   * @return {promise} - A promise that resolves with an object whose keys are the
+   * @return {object} - A promise that resolves with an object whose keys are the
    *                     variable properties, and whose values are the results of the queries.
    */
   var buildEnvironment = function(queryObjects) {
@@ -57,17 +60,18 @@ module.exports = function(query, promise) {
 
   /**
    * Replacing variables in an array of json records.
+   *
    * @param {array} records - Array of json objects.
    * @param {object} variables - Object whose fields are variables
    *                             and whose values are the data to replace with.
-   * @return Array of records whose values are replaced with the variables.
+   * @return {array} Array of records whose values are replaced with the variables.
    */
   var replaceVariables = function(records, variables) {
     var re = /\$\{(.+)\}/;
     var replacer = function(match, expression) {
       var tokens = expression.split('.');
       var fieldValue = variables[tokens[0]];
-      if(fieldValue) {
+      if (fieldValue) {
         return fieldValue[tokens[1]];
       }
       return '${' + expression + '}';

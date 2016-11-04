@@ -4,7 +4,9 @@ var expect = require('chai').expect;
 var connectionServiceFactory = require('./../../src/services/connection-service');
 
 describe('connection-service', function() {
-  var connection, jsforceMock, connectionMock;
+  var connection;
+  var jsforceMock;
+  var connectionMock;
   beforeEach(function() {
     var configMock = {
       username: 'data',
