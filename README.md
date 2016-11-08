@@ -26,7 +26,8 @@ nimbleforce: {
   sfUrl: 'https://login.salesforce.com',
   nuClassNamespace: 'NU.',
   nuObjectNamespace: 'NU__',
-  ncObjectNamespace: 'NC__'
+  ncObjectNamespace: 'NC__',
+  useBulkAPI: true || false
 }
 ```
 

@@ -14,15 +14,15 @@ describe('namespace-service', function() {
 
   it('Expect all occurances of NU__ namespace replaced', function() {
     var testJson = {
-      "NU__Product__c": {
-        "RecordTypeId": "${DonationRecordType.Id}",
-        "Name": "Test Donation Product",
-        "NU__Entity__c": "${Entity.Id}",
-        "NU__DisplayOrder__c": 1,
-        "NU__QuantityMax__c": 1,
-        "NU__ListPrice__c": 10.00,
-        "NU__RevenueGLAccount__c": "${GlAccount.Id}",
-        "NU__ExternalId__c": "TestDonationProduct"
+      'NU__Product__c': {
+        'RecordTypeId': '${DonationRecordType.Id}',
+        'Name': 'Test Donation Product',
+        'NU__Entity__c': '${Entity.Id}',
+        'NU__DisplayOrder__c': 1,
+        'NU__QuantityMax__c': 1,
+        'NU__ListPrice__c': 10.00,
+        'NU__RevenueGLAccount__c': '${GlAccount.Id}',
+        'NU__ExternalId__c': 'TestDonationProduct'
       }
     };
     var testReturnJson = namespaceService(testJson);
@@ -41,15 +41,15 @@ describe('namespace-service', function() {
   it('Expect all occurances of NU. namespace replaced', function() {
     //fake JSON to test the NU. removal
     var testJson = {
-      "NU__Product__c": {
-        "RecordTypeId": "${DonationRecordType.Id}",
-        "Name": "Test Donation Product",
-        "NU__Entity__c": "NU.EntityManager.Id",
-        "NU.DisplayOrder__c": 1,
-        "NU.QuantityMax__c": 1,
-        "NU.ListPrice__c": 10.00,
-        "NU__RevenueGLAccount__c": "${GlAccount.Id}",
-        "NU__ExternalId__c": "TestDonationProduct"
+      'NU__Product__c': {
+        'RecordTypeId': '${DonationRecordType.Id}',
+        'Name': 'Test Donation Product',
+        'NU__Entity__c': 'NU.EntityManager.Id',
+        'NU.DisplayOrder__c': 1,
+        'NU.QuantityMax__c': 1,
+        'NU.ListPrice__c': 10.00,
+        'NU__RevenueGLAccount__c': '${GlAccount.Id}',
+        'NU__ExternalId__c': 'TestDonationProduct'
       }
     };
     var testReturnJson = namespaceService(testJson);
@@ -70,15 +70,15 @@ describe('namespace-service', function() {
   it('Expect all occurances of NC__ namespace replaced', function() {
     //fake data for NC__ removal tests
     var testJson = {
-      "NC__Product__c": {
-        "RecordTypeId": "${DonationRecordType.Id}",
-        "Name": "Test Donation Product",
-        "NC__Entity__c": "${Entity.Id}",
-        "NC__DisplayOrder__c": 1,
-        "NC__QuantityMax__c": 1,
-        "NC__ListPrice__c": 10.00,
-        "NC__RevenueGLAccount__c": "${GlAccount.Id}",
-        "NC__ExternalId__c": "TestDonationProduct"
+      'NC__Product__c': {
+        'RecordTypeId': '${DonationRecordType.Id}',
+        'Name': 'Test Donation Product',
+        'NC__Entity__c': '${Entity.Id}',
+        'NC__DisplayOrder__c': 1,
+        'NC__QuantityMax__c': 1,
+        'NC__ListPrice__c': 10.00,
+        'NC__RevenueGLAccount__c': '${GlAccount.Id}',
+        'NC__ExternalId__c': 'TestDonationProduct'
       }
     };
     var testReturnJson = namespaceService(testJson);

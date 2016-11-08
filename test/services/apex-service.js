@@ -4,9 +4,12 @@ var promise = require('promised-io/promise');
 require('sinon-as-promised');
 var expect = require('chai').expect;
 var apexServiceFactory = require('./../../src/services/apex-service');
+var testLogger = function(s) {};
 
 describe('apex-service', function() {
-  var apexService, loginMock, executeMock;
+  var apexService;
+  var loginMock;
+  var executeMock;
   before(function() {
     executeMock = sinon.stub();
     var connectionMock = {
@@ -15,7 +18,7 @@ describe('apex-service', function() {
       }
     };
     loginMock = sinon.stub().resolves(connectionMock);
-    apexService = apexServiceFactory(loginMock, promise, util);
+    apexService = apexServiceFactory(loginMock, promise, util, testLogger);
   });
 
   it('Expect loginMock called', function() {
@@ -23,13 +26,15 @@ describe('apex-service', function() {
     expect(loginMock.called).to.be.true;
   });
 
-  it('Expect jsforce execution mock called', function() {
-    executeMock.callsArgWith(1, null, {compiled: true, success:true});
-    apexService('some fake apex');
-    expect(executeMock.called).to.be.true;
+  it('Expect jsforce execution mock called', function(done) {
+    executeMock.callsArgWith(1, null, {compiled: true, success: true});
+    apexService('some fake apex').then(function(result) {
+      expect(executeMock.called).to.be.true;
+      done();
+    });
   });
 
-  it('Expect promise rejection when there is a syntax issue', function() {
+  it('Expect promise rejection when there is a syntax issue', function(done) {
     executeMock.callsArgWith(1, null, {
       compiled: false,
       success: false,

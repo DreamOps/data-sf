@@ -1,23 +1,25 @@
 /**
-* Connects JSforce to the configured server,
+* Connects JSforce to the configured server.
+*
 * @param {object} jsforce - Dependency on jsforce provided.
 * @param {Promise} promise - Dependency on Promise library provided.
 * @param {object} config - Configuration (username, password, url ...) provided.
-* @return connection-service.
+* @return {function} Call this function to connect to SF through jsforce.
 */
 module.exports = function(jsforce, promise, config) {
   var conn = new jsforce.Connection({loginUrl: config.url});
   var _loggedInConnection;
 
   /**
-   * Function to login to the configured server
-   * @return Promise that resolves with the connection when the connection finishes.
+   * Function to login to the configured server.
+   *
+   * @return {object} Promise that resolves with the connection when the connection finishes.
    */
   return function() {
     var deferred = new promise.Deferred();
     if (_loggedInConnection === undefined) {
       conn.login(config.username, config.password, function(err, res) {
-        if(err) { return deferred.reject(err); }
+        if (err) { return deferred.reject(err); }
         _loggedInConnection = conn;
         deferred.resolve(_loggedInConnection);
       });
