@@ -6,8 +6,8 @@ var environmentServiceFactory = require('./../../src/services/environment-servic
 
 describe('environment-service', function() {
   describe('queryData', function() {
-    it('Expect a single record returned when results only contain 1', function() {
-      var results = [{Id:1}];
+    it('Expect a single record returned when results only contain 1', function(done) {
+      var results = [{Id: 1}];
       var queryMock = sinon.stub().resolves(results);
       var environment = environmentServiceFactory(queryMock, promise);
       environment.queryData({
@@ -16,12 +16,13 @@ describe('environment-service', function() {
       }).then(function(actualResult) {
         expect(queryMock.called).to.be.true;
         expect(actualResult).to.be.an.instanceof(Object);
-        expect(actualResult.Id).to.be.equal(1);
+        expect(actualResult.data.Id).to.be.equal(1);
+        done();
       });
     });
 
-    it('Expect all records returned when more than one records is returned by the query', function() {
-      var results = [{Id:1}, {Id:2}];
+    it('Expect all records returned when more than one records is returned by the query', function(done) {
+      var results = [{Id: 1}, {Id: 2}];
       var queryMock = sinon.stub().resolves(results);
       var environment = environmentServiceFactory(queryMock, promise);
       environment.queryData({
@@ -29,14 +30,15 @@ describe('environment-service', function() {
         query: 'SELECT Id FROM SomeVariable__c'
       }).then(function(actualResult) {
         expect(queryMock.called).to.be.true;
-        expect(actualResult).to.be.an.instanceof(Array);
-        expect(actualResult.length).to.be.equal(2);
-        expect(actualResult[0].Id).to.be.equal(1);
-        expect(actualResult[1].Id).to.be.equal(2);
+        expect(actualResult.data).to.be.an.instanceof(Array);
+        expect(actualResult.data.length).to.be.equal(2);
+        expect(actualResult.data[0].Id).to.be.equal(1);
+        expect(actualResult.data[1].Id).to.be.equal(2);
+        done();
       });
     });
 
-    it('Expect promise rejection when queryMock rejects', function() {
+    it('Expect promise rejection when queryMock rejects', function(done) {
       var reason = 'An error has occured.';
       var queryMock = sinon.stub().rejects(reason);
       var environment = environmentServiceFactory(queryMock, promise);
@@ -45,16 +47,18 @@ describe('environment-service', function() {
         query: 'SELECT Id FROM SomeVariable__c'
       }).then(function(actualResult) {
         expect(false).to.be.true;
-      }, function (actualReason) {
+        done();
+      }, function(actualReason) {
         expect(queryMock.called).to.be.true;
-        expect(actualReason).to.be.equal(reason);
+        expect(actualReason.message).to.be.equal(reason);
+        done();
       });
     });
   });
 
   describe('buildEnvironment', function() {
-    it('Expect queryMock to be called', function() {
-      var results = [{Id:1}];
+    it('Expect queryMock to be called', function(done) {
+      var results = [{Id: 1}];
       var queryMock = sinon.stub().resolves(results);
       var environment = environmentServiceFactory(queryMock, promise);
       environment.buildEnvironment([{
@@ -67,11 +71,13 @@ describe('environment-service', function() {
         expect(queryMock.called).to.be.true;
         expect(queryMock.calledTwice).to.be.true;
         expect(actualResult).to.be.an.instanceof(Object);
-        expect(actualResult).to.have.property('someVariable', 'someOtherVariable');
+        expect(actualResult).to.have.property('someVariable');
+        expect(actualResult).to.have.property('someOtherVariable');
+        done();
       });
     });
 
-    it('Expect promise rejection when queryMock rejects', function() {
+    it('Expect promise rejection when queryMock rejects', function(done) {
       var reason = 'An error has occured.';
       var queryMock = sinon.stub().rejects(reason);
       var environment = environmentServiceFactory(queryMock, promise);
@@ -83,9 +89,11 @@ describe('environment-service', function() {
         query: 'SELECT Id FROM SomeVariable__c'
       }]).then(function(actualResult) {
         expect(false).to.be.true;
+        done();
       }, function(actualReason) {
         expect(queryMock.called).to.be.true;
-        expect(actualReason).to.be.equal(reason);
+        expect(actualReason.message).to.be.equal(reason);
+        done();
       });
     });
   });
@@ -93,8 +101,8 @@ describe('environment-service', function() {
   describe('replaceVariables', function() {
     it('Expect replacement of ${variale.property} expressions', function() {
       var env = {
-        someVariable: { Id:1 },
-        someOtherVariable: { differentFieldName: 'string' }
+        someVariable: {Id: 1},
+        someOtherVariable: {differentFieldName: 'string'}
       };
       var records = [
         {
@@ -113,7 +121,7 @@ describe('environment-service', function() {
     });
 
     it('Expect missing variables not replaced', function() {
-      var env = { someVariable: { Id:1 } };
+      var env = {someVariable: {Id: 1}};
       var records = [
         {
           field1: '${someOtherVariable.Id}'

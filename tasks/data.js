@@ -1,6 +1,7 @@
 var containerFactory = require('../src/container-config');
 /**
  * Task definitions for the data/cleanData tasks.
+ *
  * @param {object} grunt - reference to the grunt configuration object.
  */
 module.exports = function(grunt) {
@@ -12,19 +13,20 @@ module.exports = function(grunt) {
     url: constants.sfUrl,
     nuClassNamespace: constants.nuClassNamespace,
     nuObjectNamespace: constants.nuObjectNamespace,
-    ncObjectNamespace: constants.ncObjectNamespace
+    ncObjectNamespace: constants.ncObjectNamespace,
+    useBulkAPI: constants.useBulkAPI || true
   });
   var seq = container.get('promise').seq;
   var dataFileService = container.get('data-file-service');
   var namespaceJSON = container.get('namespace-service');
 
-  var handleError = function (err) {
+  var handleError = function(err) {
     grunt.fail.fatal(err);
   };
 
   grunt.registerTask('data', 'Pass the data file to be synced to the SF org.', function(path) {
     if (arguments.length === 0) {
-      handleError(this.name + " Usage: data:path/to/data/file.json");
+      handleError(this.name + ' Usage: data:path/to/data/file.json');
     }
     var done = this.async();
 
@@ -57,7 +59,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('cleanData', 'Pass the data file for cleaning the SF org.', function(path) {
     if (arguments.length === 0) {
-      handleError(this.name + " Usage: cleanData:path/to/data/file.json");
+      handleError(this.name + ' Usage: cleanData:path/to/data/file.json');
     }
     var done = this.async();
 
@@ -83,7 +85,7 @@ module.exports = function(grunt) {
       }, handleError);
     } else {
       data = namespaceJSON(data);
-      dataFileService.cleanData(data.cleaners).then(function () {
+      dataFileService.cleanData(data.cleaners).then(function() {
         done();
       }, handleError);
     }

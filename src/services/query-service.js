@@ -1,14 +1,16 @@
  /**
   * Factory function for the query-service.
-  * @param {connection-service} login - Service for connecting to SF orgs.
-  * @param {Promise} promise - promise dependecy injected.
-  * @return query-service
+  *
+  * @param {function} login - Service for connecting to SF orgs.
+  * @param {object} promise - promise dependecy injected.
+  * @return {function} query-service executes a SOQL query.
   */
 module.exports = function(login, promise) {
  /**
   * Runs a query against Salesforce Org.
+  *
   * @param {string} queryString - The SOQL query string.
-  * @return Promise that resolves with the results of the query.
+  * @return {object} Promise that resolves with the results of the query.
   */
   return function(queryString) {
     var deferred = new promise.Deferred();
