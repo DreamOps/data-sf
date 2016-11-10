@@ -6,22 +6,21 @@ var containerFactory = require('../src/container-config');
  */
 module.exports = function(grunt) {
 
-  var constants = grunt.config.get('nimbleforce');
-  var container = containerFactory({
-    username: constants.username,
-    password: constants.password,
-    url: constants.sfUrl,
-    nuClassNamespace: constants.nuClassNamespace,
-    nuObjectNamespace: constants.nuObjectNamespace,
-    ncObjectNamespace: constants.ncObjectNamespace,
-    useBulkAPI: constants.useBulkAPI || true
-  });
-  var seq = container.get('promise').seq;
-  var dataFileService = container.get('data-file-service');
-  var namespaceJSON = container.get('namespace-service');
-
   var handleError = function(err) {
     grunt.fail.fatal(err);
+  };
+
+  var constants = grunt.config.get('nimbleforce');
+  var getContainer = function() {
+    return containerFactory({
+      username: constants.username,
+      password: constants.password,
+      url: constants.sfUrl,
+      nuClassNamespace: constants.nuClassNamespace,
+      nuObjectNamespace: constants.nuObjectNamespace,
+      ncObjectNamespace: constants.ncObjectNamespace,
+      useBulkAPI: constants.useBulkAPI || true
+    });
   };
 
   grunt.registerTask('data', 'Pass the data file to be synced to the SF org.', function(path) {
@@ -29,6 +28,11 @@ module.exports = function(grunt) {
       handleError(this.name + ' Usage: data:path/to/data/file.json');
     }
     var done = this.async();
+
+    var container = getContainer();
+    var seq = container.get('promise').seq;
+    var dataFileService = container.get('data-file-service');
+    var namespaceJSON = container.get('namespace-service');
 
     var data = grunt.file.readJSON(path);
 
@@ -62,6 +66,11 @@ module.exports = function(grunt) {
       handleError(this.name + ' Usage: cleanData:path/to/data/file.json');
     }
     var done = this.async();
+
+    var container = getContainer();
+    var seq = container.get('promise').seq;
+    var dataFileService = container.get('data-file-service');
+    var namespaceJSON = container.get('namespace-service');
 
     var data = grunt.file.readJSON(path);
 
