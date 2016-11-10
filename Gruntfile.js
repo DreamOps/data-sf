@@ -24,8 +24,8 @@ module.exports = function(grunt) {
       username: 'kzn-210@nu.dev',
       password: 'Honor210',
       sfUrl: 'https://login.salesforce.com',
-      nuClassNamespace: 'znu.',
-      nuObjectNamespace: 'znu__',
+      nuClassNamespace: 'NU.',
+      nuObjectNamespace: 'NU__',
       ncObjectNamespace: 'NC__'
     },
     jscs: {
