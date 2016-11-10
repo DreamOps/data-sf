@@ -38,6 +38,7 @@ var bulkRecordService = require('./services/bulk-record-service');
  * @return {object} Container
  */
 module.exports = function(config) {
+  container.reset();
   container.register('config', [], function() {
     return config;
   });
