@@ -8,6 +8,7 @@
 var container = require('kontainer-di');
 var jsforce = require('jsforce');
 var promise = require('promised-io/promise');
+var fs = require('promised-io/fs');
 var util = require('util');
 var connectionService = require('./services/connection-service');
 var queryService = require('./services/query-service');
@@ -18,6 +19,8 @@ var communityUserService = require('./services/community-user-service');
 var dataFileService = require('./services/data-file-service');
 var namespaceService = require('./services/namespace-service');
 var bulkRecordService = require('./services/bulk-record-service');
+var exportService = require('./services/export-service');
+var bulkQueryService = require('./services/bulk-query-service');
 
 /**
  * Decided to make this container a factory function as well,
@@ -48,6 +51,9 @@ module.exports = function(config) {
   container.register('promise', [], function() {
     return promise;
   });
+  container.register('fs', [], function() {
+    return fs;
+  });
   container.register('util', [], function() {
     return util;
   });
@@ -59,6 +65,7 @@ module.exports = function(config) {
   container.register('namespace-service', ['config'], namespaceService);
   container.register('connection', ['jsforce', 'promise', 'config'], connectionService);
   container.register('query-service', ['connection', 'promise'], queryService);
+  container.register('bulk-query-service', ['connection', 'promise'], bulkQueryService);
   container.register('apex-service', ['connection', 'promise', 'util', 'logger'], apexService);
   container.register('environment-service', ['query-service', 'promise'], environmentService);
   container.register('record-service', ['connection', 'promise', 'logger'], recordService);
@@ -68,12 +75,15 @@ module.exports = function(config) {
       communityUserService);
   if (config.useBulkAPI) {
     container.register('data-file-service',
-        ['environment-service', 'bulk-record-service', 'apex-service', 'promise'],
+        ['environment-service', 'bulk-record-service', 'apex-service', 'promise', 'fs'],
         dataFileService);
   } else {
     container.register('data-file-service',
-        ['environment-service', 'record-service', 'apex-service', 'promise'],
+        ['environment-service', 'record-service', 'apex-service', 'promise', 'fs'],
         dataFileService);
   }
+  container.register('export-service',
+        ['connection', 'query-service', 'bulk-query-service', 'data-file-service', 'promise'],
+        exportService);
   return container;
 };

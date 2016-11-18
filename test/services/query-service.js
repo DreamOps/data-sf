@@ -8,17 +8,13 @@ describe('query-service', function() {
   var query;
   var loginMock;
   var queryMock;
-  before(function() {
+  beforeEach(function() {
     queryMock = sinon.stub();
     var connectionMock = {
       query: queryMock
     };
     loginMock = sinon.stub().resolves(connectionMock);
     query = queryServiceFactory(loginMock, promise);
-  });
-
-  afterEach(function() {
-    queryMock.reset();
   });
 
   it('Expect loginMock called', function() {

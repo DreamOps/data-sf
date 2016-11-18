@@ -5,9 +5,10 @@
  * @param {object} recordService - record-service dependency provided.
  * @param {function} executeApex - apex-service dependecy provided.
  * @param {object} promise - promise dependency provided.
+ * @param {object} fs - file system dependency provided.
  * @return {object} data-file-service provides functions for managing json data files.
  */
-module.exports = function(environment, recordService, executeApex, promise) {
+module.exports = function(environment, recordService, executeApex, promise, fs) {
   /**
    * Processes the queries and records properties of a json data file.
    * Builds the environment based on the queries and replaces the data
@@ -45,17 +46,64 @@ module.exports = function(environment, recordService, executeApex, promise) {
     var deferred = new promise.Deferred();
     var promises = records.map(function(record) {
       if (record.type === 'ApexScript') {
-        return executeApex(record.body.join('\n'));
+        return function() {
+          return executeApex(record.body.join('\n'));
+        };
       }
     });
-    promise.all(promises).then(function(results) {
+    promise.seq(promises).then(function(results) {
       deferred.resolve();
     }, function(err) { deferred.reject(err); });
     return deferred.promise;
   };
 
+  var templateJson = {
+    extId: undefined,
+    queries: undefined,
+    records: {},
+    cleaners: []
+  };
+
+  var templateManifest = {
+    manifest: true,
+    order: []
+  };
+
+  /**
+   * Write a json data file to disk.
+   *
+   * @param {array} records - Array of JSON SObject records.
+   * @param {string} destination - The location to save the new file.
+   * @param {string} type - The SObject type of the records being passed in.
+   * @param {string} extId - The extId property in the data file.
+   * @param {array} queries - The queries property in the data file, an array of query objects.
+   * @return {object} Promise that resolves when the file is written.
+   */
+  var writeDataFile = function(records, destination, type, extId, queries) {
+    var fileJson = JSON.parse(JSON.stringify(templateJson));
+    fileJson.records[type] = records;
+    fileJson.extId = extId || 'NU__ExternalID__c';
+    fileJson.queries = queries || [];
+    return fs.writeFile(destination, JSON.stringify(fileJson, null, 2));
+  };
+
+  /**
+   * Write a manifest file for loading other json data files.
+   *
+   * @param {string} destination - The file to write.
+   * @param {array} fileNames - Array of string file names for the manifest.
+   * @return {object} Promise that resolves when the file is written.
+   */
+  var writeManifestFile = function(destination, fileNames) {
+    var fileJson = JSON.parse(JSON.stringify(templateManifest));
+    fileJson.order = fileNames;
+    return fs.writeFile(destination, JSON.stringify(fileJson, null, 2));
+  };
+
   return {
     processData: processData,
-    cleanData: cleanData
+    cleanData: cleanData,
+    writeDataFile: writeDataFile,
+    writeManifestFile: writeManifestFile
   };
 };

@@ -115,7 +115,7 @@ describe('bulk-record-service', function() {
     it('Expect batchMock.poll called with correct timeouts', function(done) {
       bulkRecordService.insertRecords('Account', records, 'externalId')
       .then(function() {
-        expect(batchMock.poll.calledWith(1000, 200000)).to.be.true;
+        expect(batchMock.poll.calledWith(1000, 500000)).to.be.true;
         done();
       });
     });
@@ -165,7 +165,7 @@ describe('bulk-record-service', function() {
         expect(jobMock.close.called).to.be.false;
         expect(jobMock.createBatch.called).to.be.true;
         expect(batchMock.execute.calledWith(records)).to.be.true;
-        expect(batchMock.poll.calledWith(1000, 200000)).to.be.true;
+        expect(batchMock.poll.calledWith(1000, 500000)).to.be.true;
         expect(batchMock.on.calledWith('queue')).to.be.true;
         done();
       });
