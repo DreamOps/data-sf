@@ -41,6 +41,7 @@ Let's take a deeper look at one of these files.
 
 ```json
 {
+  "extId": "NU__ExternalId__c",
   "queries": [
     {
         "variable": "Entity",
@@ -118,3 +119,71 @@ as the rest of the data files.
 }
 
 ```
+
+### Exporting Data ###
+
+You can export data from an org with the export grunt task.
+
+```shell
+grunt export:path/to/queries/file.json:path/to/destination/dir
+```
+
+The export task will take SObjects from the org and export them into json data files in the destination directory.
+It also generates a manifest file for upserting all the data to an org using the data task. The first argument is a
+configuration file provided. See the following example:
+
+```json
+[
+  {
+    "name": "Batch Export Config",
+    "useBulk": true,
+    "query": "SELECT Id, Name, NU__ExportGenerator__c, NU__ExternalID__c FROM NU__BatchExportConfiguration__c",
+    "type": "NU__BatchExportConfiguration__c",
+    "id": "NU__ExternalID__c",
+    "mappings": [
+      {
+        "sourceColumn": "Id",
+        "destColumn": "NU__ExternalID__c"
+      }
+    ]
+  },
+  {
+    "name": "Committee Position",
+    "query": "SELECT Id, Name, NU__ExternalID__c, NU__SortOrder__c FROM NU__CommitteePosition__c",
+    "type": "NU__CommitteePosition__c",
+    "id": "NU__ExternalID__c",
+    "mappings": [
+      {
+        "sourceColumn": "Id",
+        "destColumn": "NU__ExternalID__c"
+      }
+    ]
+  },
+  {
+    "name": "Entities",
+    "query": "SELECT Id, Name, NU__AccountCreatedEmailTemplate__c, ... FROM NU__Entity__c",
+    "type": "NU__Entity__c",
+    "id": "NU__ExternalID__c",
+    "mappings": [
+      {
+        "sourceColumn": "Id",
+        "destColumn": "NU__ExternalID__c"
+      },
+      {
+        "sourceColumn": "NU__BatchExportConfiguration__c",
+        "destColumn": "NU__BatchExportConfiguration__r.NU__ExternalID__c"
+      }
+    ]
+  },
+  ...
+]
+```
+
+The configuration is based on queries. The query property is executed and then that returned set of records is
+exported into the data file. The resulting file will be named the name property of the configuration (with the
+spaces replaced with _). The id field will be used as the extId in the resulting data file. The mappings array
+is the definition for transforming the resulting records, every sourceColumn will be copied into destColumn and
+the source column is deleted. The mappings make handling relationships between objects easy (Check out the
+Entities configuration). Order is important, as the resulting manifest file will preserve the order. So the order
+you query the objects in is the order they get upserted into the destination (which is obviously configurable after
+the fact as well).

@@ -20,7 +20,7 @@ module.exports = function(login, promise, util, logger) {
       connection.tooling.executeAnonymous(apexBody, function(err, res) {
         if (err) { return deferred.reject(err); }
         if (!res.compiled) {
-            return deferred.reject(res.compileProblem);
+          return deferred.reject(res.compileProblem);
         }
         logger('successful executeAnonymous ' + util.inspect(res));
         deferred.resolve(res);

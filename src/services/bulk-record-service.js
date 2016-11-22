@@ -44,7 +44,11 @@ module.exports = function(login, promise, logger) {
    */
   var insertRecords = function(type, records, extId) {
     var deferred = new promise.Deferred();
-
+    if (records.length < 1) {
+      logger('Empty records, nothing to do');
+      deferred.resolve();
+      return deferred.promise;
+    }
     //set externalIds if it is not already set.
     extId = extId || 'NU__ExternalID__c';
     records = records.map(function(record, index) {
@@ -60,7 +64,7 @@ module.exports = function(login, promise, logger) {
       var batch = job.createBatch();
       batch.on('queue', function(batchInfo) {
         //poll the batch every second, timeout after 200s
-        batch.poll(1000, 200000);
+        batch.poll(1000, 500000);
         logger('batch is queued, jobId: ' + batchInfo.jobId +
                ' batchId: ' + batchInfo.batchId);
       });
