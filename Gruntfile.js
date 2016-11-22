@@ -21,8 +21,8 @@ module.exports = function(grunt) {
 
     // Configuration to be run (and then tested).
     nimbleforce: {
-      username: 'kzn-210@nu.dev',
-      password: 'Honor210',
+      username: 'kzn-212b@nu.dev',
+      password: 'Honor212',
       sfUrl: 'https://login.salesforce.com',
       nuClassNamespace: 'NU.',
       nuObjectNamespace: 'NU__',

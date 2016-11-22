@@ -180,4 +180,138 @@ describe('data-file-service', function() {
       });
     });
   });
+
+  describe('writeDataFile', function() {
+    var dataFileService;
+    var fsMock;
+    var records;
+    var destinationFile;
+    var type;
+    var extId;
+    var queries;
+    beforeEach(function() {
+      records = [{Id: 1}, {Id: 2}];
+      queries = [{query: 'yerp'}, {query: 'yurp'}];
+      extId = 'EXTERNALID';
+      type = 'Account';
+      destinationFile = 'Path/to/destination/file.json';
+      fsMock = {
+        writeFile: sinon.stub()
+      };
+      dataFileService = dataFileServiceFactory(
+        null,
+        null,
+        null,
+        null,
+        fsMock
+      );
+    });
+
+    it('calls fs with destination file', function() {
+      dataFileService.writeDataFile(
+        records,
+        destinationFile,
+        type,
+        extId,
+        queries
+      );
+      expect(fsMock.writeFile.calledWith(destinationFile)).to.be.true;
+    });
+
+    it('Expect extId set', function() {
+      dataFileService.writeDataFile(
+        records,
+        destinationFile,
+        type,
+        extId,
+        queries
+      );
+      var jsonArg = JSON.parse(fsMock.writeFile.getCall(0).args[1]);
+      expect(jsonArg.extId).to.be.eq(extId);
+    });
+
+    it('Expect extId default set', function() {
+      dataFileService.writeDataFile(
+        records,
+        destinationFile,
+        type,
+        null,
+        queries
+      );
+      var jsonArg = JSON.parse(fsMock.writeFile.getCall(0).args[1]);
+      expect(jsonArg.extId).to.be.eq('NU__ExternalID__c');
+    });
+
+    it('Expect queries default set', function() {
+      dataFileService.writeDataFile(
+        records,
+        destinationFile,
+        type,
+        extId,
+        null
+      );
+      var jsonArg = JSON.parse(fsMock.writeFile.getCall(0).args[1]);
+      expect(jsonArg.queries).to.be.instanceOf(Array);
+      expect(jsonArg.queries.length).to.be.eq(0);
+    });
+
+    it('Expect records set', function() {
+      dataFileService.writeDataFile(
+        records,
+        destinationFile,
+        type,
+        extId,
+        null
+      );
+      var jsonArg = JSON.parse(fsMock.writeFile.getCall(0).args[1]);
+      expect(jsonArg.records).to.be.instanceOf(Object);
+      expect(jsonArg.records[type]).to.be.instanceOf(Array);
+      expect(jsonArg.records[type].length).to.be.eq(2);
+      expect(jsonArg.records[type][0].Id).to.be.eq(1);
+      expect(jsonArg.records[type][1].Id).to.be.eq(2);
+    });
+  });
+
+  describe('writeManifestFile', function() {
+    var dataFileService;
+    var fsMock;
+    var fileNames;
+    var destinationFile;
+    beforeEach(function() {
+      destinationFile = 'Path/to/destination/file.json';
+      fileNames = ['1', '2', '3'];
+      fsMock = {
+        writeFile: sinon.stub()
+      };
+      dataFileService = dataFileServiceFactory(
+        null,
+        null,
+        null,
+        null,
+        fsMock
+      );
+    });
+
+    it('calls fs with destination file', function() {
+      dataFileService.writeManifestFile(
+        destinationFile,
+        fileNames
+      );
+      expect(fsMock.writeFile.calledWith(destinationFile)).to.be.true;
+    });
+
+    it('calls fs with templateManifest', function() {
+      dataFileService.writeManifestFile(
+        destinationFile,
+        fileNames
+      );
+      var jsonArg = JSON.parse(fsMock.writeFile.getCall(0).args[1]);
+      expect(jsonArg.order).to.be.instanceOf(Array);
+      expect(jsonArg.order.length).to.be.eq(3);
+      expect(jsonArg.order[0]).to.be.eq('1');
+      expect(jsonArg.order[1]).to.be.eq('2');
+      expect(jsonArg.order[2]).to.be.eq('3');
+      expect(jsonArg.manifest).to.be.eq(true);
+    });
+  });
 });

@@ -1,4 +1,5 @@
 var containerFactory = require('../src/container-config');
+var readlineSync = require('readline-sync');
 /**
  * Task definitions for the data/cleanData tasks.
  *
@@ -12,6 +13,7 @@ module.exports = function(grunt) {
 
   var constants = grunt.config.get('nimbleforce');
   var getContainer = function() {
+    var useBulkAPI = constants.useBulkAPI == undefined ? true : constants.useBulkAPI;
     return containerFactory({
       username: constants.username,
       password: constants.password,
@@ -19,7 +21,7 @@ module.exports = function(grunt) {
       nuClassNamespace: constants.nuClassNamespace,
       nuObjectNamespace: constants.nuObjectNamespace,
       ncObjectNamespace: constants.ncObjectNamespace,
-      useBulkAPI: constants.useBulkAPI || true
+      useBulkAPI: useBulkAPI
     });
   };
 
@@ -61,7 +63,31 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.registerTask('export', 'Pass the queries file of data to export.', function(path, dest) {
+    if (arguments.length < 2) {
+      handleError(this.name + ' Usage: export:path/to/queries/file.json:path/to/destination/dir');
+    }
+
+    if (!grunt.file.exists(dest) || !grunt.file.isDir(dest)) {
+      handleError('Destination must be an existing directory.');
+    }
+    var done = this.async();
+
+    var container = getContainer();
+    var exportService = container.get('export-service');
+    var queries = grunt.file.readJSON(path);
+
+    exportService.export(queries, dest).then(function() {
+      done();
+    }, function(err) {
+      done(err);
+    });
+  });
+
   grunt.registerTask('cleanData', 'Pass the data file for cleaning the SF org.', function(path) {
+    if (!readlineSync.keyInYN('username: ' + constants.username + ' Are you sure?')) {
+      handleError('Aborting');
+    }
     if (arguments.length === 0) {
       handleError(this.name + ' Usage: cleanData:path/to/data/file.json');
     }
