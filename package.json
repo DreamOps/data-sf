@@ -1,7 +1,7 @@
 {
   "name": "nimbleforce",
   "description": "grunt tasks and nimbleforce",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": {
     "name": "NimbleUser",
     "email": "jjuby@nimbleuser.com"
@@ -28,11 +28,12 @@
   ],
   "devDependencies": {
     "chai": "~3.5.0",
-    "sinon": "~1.17.6",
-    "sinon-as-promised": "~4.0.2",
-    "mocha": "~3.1.2",
+    "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-jscs": "~2.8.0",
-    "grunt-mocha-test": "~0.13.2"
+    "grunt-mocha-test": "~0.13.2",
+    "mocha": "~3.1.2",
+    "sinon": "~1.17.6",
+    "sinon-as-promised": "~4.0.2"
   }
 }
