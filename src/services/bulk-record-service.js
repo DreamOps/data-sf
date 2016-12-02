@@ -89,6 +89,11 @@ module.exports = function(login, promise, logger) {
         logger('Total Processing Time ' + jobInfo.totalProcessingTime);
         return deferred.resolve(jobInfo);
       });
+
+      job.on('error', function(error) {
+        logger('Job errord' + error);
+        return deferred.reject(error);
+      });
     });
     return deferred.promise;
   };
