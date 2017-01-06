@@ -20,6 +20,7 @@ var dataFileService = require('./services/data-file-service');
 var namespaceService = require('./services/namespace-service');
 var bulkRecordService = require('./services/bulk-record-service');
 var exportService = require('./services/export-service');
+var queryObjectFactory = require('./factories/query-object');
 var bulkQueryService = require('./services/bulk-query-service');
 
 /**
@@ -66,6 +67,7 @@ module.exports = function(config) {
   container.register('connection', ['jsforce', 'promise', 'config'], connectionService);
   container.register('query-service', ['connection', 'promise'], queryService);
   container.register('bulk-query-service', ['connection', 'promise'], bulkQueryService);
+  container.register('query-object-factory', ['query-service', 'bulk-query-service', 'promise'], queryObjectFactory);
   container.register('apex-service', ['connection', 'promise', 'util', 'logger'], apexService);
   container.register('environment-service', ['query-service', 'promise'], environmentService);
   container.register('record-service', ['connection', 'promise', 'logger'], recordService);
@@ -82,8 +84,6 @@ module.exports = function(config) {
         ['environment-service', 'record-service', 'apex-service', 'promise', 'fs'],
         dataFileService);
   }
-  container.register('export-service',
-        ['connection', 'query-service', 'bulk-query-service', 'data-file-service', 'promise'],
-        exportService);
+  container.register('export-service', ['connection', 'data-file-service', 'promise'], exportService);
   return container;
 };

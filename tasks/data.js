@@ -75,7 +75,9 @@ module.exports = function(grunt) {
 
     var container = getContainer();
     var exportService = container.get('export-service');
-    var queries = grunt.file.readJSON(path);
+    var queryObjectFactory = container.get('query-object-factory');
+    var namespaceJSON = container.get('namespace-service');
+    var queries = queryObjectFactory(namespaceJSON(grunt.file.readJSON(path)));
 
     exportService.export(queries, dest).then(function() {
       done();
