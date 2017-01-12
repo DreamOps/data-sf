@@ -21,7 +21,7 @@ module.exports = function(query, bulkQuery, promise) {
   };
 
   var mapRecordTypes = function(record, recordTypeQueries) {
-    if (record.RecordTypeId && recordTypeQueries) {
+    if (record.RecordTypeId && recordTypeQueries && recordTypeQueries[record.RecordTypeId]) {
       record.RecordTypeId = '${' + recordTypeQueries[record.RecordTypeId].variable + '.Id}';
     }
     return record;
