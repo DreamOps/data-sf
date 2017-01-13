@@ -28,9 +28,9 @@ module.exports = function(query, bulkQuery, promise) {
   };
 
   var getRecordTypeQuery = function(type, name) {
-    var q = 'SELECT Id, Name, DeveloperName FROM RecordType' +
+    var q = 'SELECT Id, Name FROM RecordType' +
             ' WHERE SObjectType = \'' + type + '\' AND IsActive = true';
-    if (name) { q += ' AND DeveloperName = \'' + name + '\''; }
+    if (name) { q += ' AND Name = \'' + name + '\''; }
     return q;
   };
 
@@ -64,7 +64,7 @@ module.exports = function(query, bulkQuery, promise) {
     var self = this;
     query(getRecordTypeQuery(this.datum.type)).then(function(results) {
       deferred.resolve(results.reduce(function(total, result) {
-        total[result.Id] = self.createRecordTypeQueryObject(result.DeveloperName);
+        total[result.Id] = self.createRecordTypeQueryObject(result.Name);
         return total;
       }, {}));
     });
