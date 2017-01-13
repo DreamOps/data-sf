@@ -79,7 +79,7 @@ describe('query-objcet-factory', function() {
       var recordTypeRecords = [{
         attributes: [{}, 'stuff in here'],
         'Id': '1',
-        DeveloperName: 'SampleRecordType'
+        Name: 'SampleRecordType'
       }];
 
       it('calls bulkQuery when isBulk true', function(done) {
@@ -177,7 +177,7 @@ describe('query-objcet-factory', function() {
           var newRecord = qObjects[0].doQuery().then(function() {
             var mappedRecord = qObjects[0].records[0];
             expect(mappedRecord.RecordTypeId).to.be.eq(
-              '${' + recordTypeRecords[0].DeveloperName + 'RT.Id}'
+              '${' + recordTypeRecords[0].Name + 'RT.Id}'
             );
             done();
           }, function(err) {
@@ -191,8 +191,8 @@ describe('query-objcet-factory', function() {
     describe('exportRecordTypes', function() {
       beforeEach(function() {
         records = [
-          {Id: 1, Name: 'Individual', DeveloperName: 'Individual'},
-          {Id: 2, Name: 'Organization', DeveloperName: 'Organization'}
+          {Id: 1, Name: 'Individual'},
+          {Id: 2, Name: 'Organization'}
         ];
         queryMock = sinon.stub().resolves(records);
         queryObjectFactory = queryObjectFactoryFunction(
@@ -204,7 +204,7 @@ describe('query-objcet-factory', function() {
       });
 
       it('Expects query called', function(done) {
-        var recordTypeQuery = 'SELECT Id, Name, DeveloperName FROM RecordType' +
+        var recordTypeQuery = 'SELECT Id, Name FROM RecordType' +
             ' WHERE SObjectType = \'NU__BatchExportConfiguration__c\' AND IsActive = true';
         qObjects[0].exportRecordTypes()
         .then(function() {
