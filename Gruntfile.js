@@ -2,19 +2,6 @@
 
 module.exports = function(grunt) {
 
-  grunt.config('username', grunt.option('username') || 'kzn-46@nu.dev');
-  grunt.config('password', grunt.option('password') || 'Honor1234');
-  grunt.config('sfUrl', grunt.option('sfUrl') || 'https://login.salesforce.com');
-  if (grunt.option('noNamespace')) {
-    grunt.config('nuClassNamespace', '');
-    grunt.config('nuObjectNamespace', '');
-    grunt.config('ncObjectNamespace', '');
-  } else {
-    grunt.config('nuClassNamespace', grunt.option('nuClassNamespace') || 'NU.');
-    grunt.config('nuObjectNamespace', grunt.option('nuObjectNamespace') || 'NU__');
-    grunt.config('ncObjectNamespace', grunt.option('ncObjectNamespace') || 'NC__');
-  }
-
   grunt.loadNpmTasks('grunt-mocha-test');
 
   // Project configuration.
@@ -34,12 +21,15 @@ module.exports = function(grunt) {
 
     // Configuration to be run (and then tested).
     nimbleforce: {
-      username: grunt.config('username'),
-      password: grunt.config('password'),
-      sfUrl: grunt.config('sfUrl'),
-      nuClassNamespace: grunt.config('nuClassNamespace'),
-      nuObjectNamespace: grunt.config('nuObjectNamespace'),
-      ncObjectNamespace: grunt.config('ncObjectNamespace')
+      username: 'kzn-46@nu.dev',
+      password: 'Honor1234',
+      sfUrl: 'https://login.salesforce.com',
+      namespaces: {
+        'NU__': 'NU__',
+        'NC__': 'NC__',
+        'NU.': 'NU.'
+      },
+      useBulkAPI: true
     },
     jscs: {
       src: [

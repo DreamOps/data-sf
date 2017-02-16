@@ -4,7 +4,7 @@ require('sinon-as-promised');
 var expect = require('chai').expect;
 var queryObjectFactoryFunction = require('./../../src/factories/query-object');
 
-describe('query-objcet-factory', function() {
+describe('query-object-factory', function() {
   var queryObjectdata = [{
     'name': 'Batch Export Config',
     'useBulk': true,
@@ -15,6 +15,10 @@ describe('query-objcet-factory', function() {
       {
         'sourceColumn': 'Id',
         'destColumn': 'NU__ExternalID__c'
+      },
+      {
+        'value': 'bar',
+        'destColumn': 'foo'
       }
     ]
   },
@@ -27,6 +31,10 @@ describe('query-objcet-factory', function() {
       {
         'sourceColumn': 'Id',
         'destColumn': 'NU__ExternalID__c'
+      },
+      {
+        'value': 'bar',
+        'destColumn': 'foo'
       }
     ]
   }];
@@ -159,6 +167,18 @@ describe('query-objcet-factory', function() {
           var newRecord = qObjects[0].doQuery().then(function() {
             var mappedRecord = qObjects[0].records[0];
             expect(mappedRecord.Id).to.be.undefined;
+            done();
+          }, function(err) {
+            expect(err).to.be.undefined;
+            done(err);
+          });
+        });
+
+        it('maps the value to the destColumn', function(done) {
+          var value = 'bar';
+          var newRecord = qObjects[0].doQuery().then(function() {
+            var mappedRecord = qObjects[0].records[0];
+            expect(mappedRecord.foo).to.be.eq(value);
             done();
           }, function(err) {
             expect(err).to.be.undefined;
