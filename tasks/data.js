@@ -6,22 +6,31 @@ var readlineSync = require('readline-sync');
  * @param {object} grunt - reference to the grunt configuration object.
  */
 module.exports = function(grunt) {
+  var constants = grunt.config.get('nimbleforce');
+  grunt.config('username', grunt.option('username') || constants.username);
+  grunt.config('password', grunt.option('password') || constants.password);
+  grunt.config('sfUrl', grunt.option('sfUrl') || constants.sfUrl);
+  grunt.config('useBulkAPI', grunt.option('useBulkAPI') || constants.useBulkAPI);
+  grunt.config('instanceUrl', grunt.option('instanceUrl'));
+  grunt.config('jwt', grunt.option('jwt'));
+  grunt.config('namespaces', grunt.option('namespaces') || constants.namespaces);
 
   var handleError = function(err) {
     grunt.fail.fatal(err);
   };
 
-  var constants = grunt.config.get('nimbleforce');
   var getContainer = function() {
-    var useBulkAPI = constants.useBulkAPI == undefined ? true : constants.useBulkAPI;
+    if (grunt.config('namespaces') instanceof String) {
+      grunt.config('namespaces', JSON.parse(grunt.config('namespaces')));
+    }
     return containerFactory({
-      username: constants.username,
-      password: constants.password,
-      url: constants.sfUrl,
-      nuClassNamespace: constants.nuClassNamespace,
-      nuObjectNamespace: constants.nuObjectNamespace,
-      ncObjectNamespace: constants.ncObjectNamespace,
-      useBulkAPI: useBulkAPI
+      username: grunt.config('username'),
+      password: grunt.config('password'),
+      url: grunt.config('sfUrl'),
+      instanceUrl: grunt.config('instanceUrl'),
+      jwt: grunt.config('jwt'),
+      namespaces: grunt.config('namespaces'),
+      useBulkAPI: grunt.config('useBulkAPI')
     });
   };
 

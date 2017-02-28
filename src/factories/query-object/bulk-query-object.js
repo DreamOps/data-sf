@@ -1,20 +1,20 @@
 /**
  * Factory function for BulkQueryObjects constructor.
  *
- * @param {function} QueryObject - QueryObject constructor.
+ * @param {function} ExportQueryObject - ExportQueryObject constructor.
  * @param {function} bulkQuery - bulk-query-service dependency provided.
  * @return {function} query-object-factory - Constructs QueryObject instances.
  */
-module.exports = function(QueryObject, bulkQuery) {
+module.exports = function(ExportQueryObject, bulkQuery) {
   /**
-   * BulkQueryObject inherits from QueryObject.
+   * BulkQueryObject inherits from ExportQueryObject.
    * Uses the bulk API to retrieve the records.
    */
   function BulkQueryObject(queryObjectDatum) {
-    QueryObject.call(this, queryObjectDatum);
+    ExportQueryObject.call(this, queryObjectDatum);
   }
 
-  BulkQueryObject.prototype = Object.create(QueryObject.prototype);
+  BulkQueryObject.prototype = Object.create(ExportQueryObject.prototype);
   BulkQueryObject.prototype.constructor = BulkQueryObject;
 
   BulkQueryObject.prototype.queryForRecords = function() {

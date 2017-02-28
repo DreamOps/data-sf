@@ -18,15 +18,27 @@ Once the plugin has been installed, it may be enabled inside your Gruntfile with
 grunt.loadNpmTasks('nimbleforce');
 ```
 
+##Local dev
+You can also use this tool locally:
+
+```shell
+git clone git@bitbucket.org:nimbleams/nimbleforce.git
+cd nimbleforce
+npm install
+```
+And then run any grunt commands
+
 ### Configuration ###
 ```json
 nimbleforce: {
   username: 'qa-123@nu.dev',
   password: 'Honor1234',
   sfUrl: 'https://login.salesforce.com',
-  nuClassNamespace: 'NU.',
-  nuObjectNamespace: 'NU__',
-  ncObjectNamespace: 'NC__',
+  namespaces: {
+    'NU__': 'znu__',
+    'NC__': '',
+    'NU.': 'znu.'
+  },
   useBulkAPI: true || false
 }
 ```

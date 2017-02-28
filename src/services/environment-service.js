@@ -1,32 +1,13 @@
 /**
  * Factory function for environment-service.
  *
- * @param {function} query - query-service dependency injection.
+ * @param {function} queryObjectFactory - factory for query objects.
  * @param {Promise} promise - promise library dependency injection.
  * @return {object} environment-service provides functions for building an environment via queries.
  */
-module.exports = function(query, promise) {
-  /**
-   * Queries data from a SF org and returns a result
-   * object for replacing variables.
-   *
-   * @param {object} queryObj - An object adhering to following interface:
-   *                            { variable: 'SomeString', query: 'SELECT Id FROM...' }
-   * @return {object} Object adhering to the following interface:
-   *         { variable: 'SomeString', data: {... query results...} }
-   */
-  var queryData = function(queryObj) {
-    var deferred = new promise.Deferred();
-    query(queryObj.query).then(function(results) {
-      //if it is only one record return that record
-      if (results.length === 1) {
-        return deferred.resolve({variable: queryObj.variable, data: results[0]});
-      }
-      return deferred.resolve({variable: queryObj.variable, data: results});
-    }, function(err) {
-      deferred.reject(err);
-    });
-    return deferred.promise;
+module.exports = function(queryObjectFactory, promise) {
+  var formatter = function(records) {
+    return (records && records.length === 1) ? records[0] : records;
   };
 
   /**
@@ -44,12 +25,13 @@ module.exports = function(query, promise) {
   var buildEnvironment = function(queryObjects) {
     var deferred = new promise.Deferred();
     var variables = {};
+    queryObjects = queryObjectFactory(queryObjects);
     var promises = queryObjects.map(function(q) {
-      return queryData(q);
+      return q.doQuery();
     });
-    promise.all(promises).then(function(results) {
-      results.forEach(function(result) {
-        variables[result.variable] = result.data;
+    promise.all(promises).then(function() {
+      queryObjects.forEach(function(q) {
+        variables[q.getName()] = q.formatRecords(formatter);
       });
       deferred.resolve(variables);
     }, function(err) {
@@ -90,7 +72,6 @@ module.exports = function(query, promise) {
   };
 
   return {
-    queryData: queryData,
     buildEnvironment: buildEnvironment,
     replaceVariables: replaceVariables
   };

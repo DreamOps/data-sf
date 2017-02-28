@@ -24,19 +24,21 @@ var queryObjectFactory = require('./factories/query-object');
 var bulkQueryService = require('./services/bulk-query-service');
 
 /**
- * Decided to make this container a factory function as well,
- * this way the config could be passed into the container instead
+ * Container is a factory function as well.
+ * This way the config could be passed into the container instead
  * of required as a file here.
  *
  * @param {object} config - Object of config properties.
  *   {
  *     username: 'salesforce username',
  *     password: 'salesforce password',
- *     url: 'https://login.salesforce.com' or 'https://login.salesforce.com',
- *     //Namespace properties will be used to replace the default namespaces
- *     nuClassNamespace: 'NU.',
- *     nuObjectNamespace: 'NU__',
- *     ncObjectNamespace: 'NC__',
+ *     url: 'https://login.salesforce.com' || 'https://test.salesforce.com',
+ *     //Namespaces object to replace namespaces
+ *     namespaces: {
+ *       'NU__': 'znu__',
+ *       'NC__': '',
+ *       'NU.': 'znu.'
+ *     },
  *     useBulkAPI: true | false
  *   }
  * @return {object} Container
@@ -69,7 +71,7 @@ module.exports = function(config) {
   container.register('bulk-query-service', ['connection', 'promise'], bulkQueryService);
   container.register('query-object-factory', ['query-service', 'bulk-query-service', 'promise'], queryObjectFactory);
   container.register('apex-service', ['connection', 'promise', 'util', 'logger'], apexService);
-  container.register('environment-service', ['query-service', 'promise'], environmentService);
+  container.register('environment-service', ['query-object-factory', 'promise'], environmentService);
   container.register('record-service', ['connection', 'promise', 'logger'], recordService);
   container.register('bulk-record-service', ['connection', 'promise', 'logger'], bulkRecordService);
   container.register('community-user-service',

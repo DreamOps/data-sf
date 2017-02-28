@@ -5,11 +5,11 @@ var namespaceServiceFactory = require('./../../src/services/namespace-service');
 describe('namespace-service', function() {
   var namespaceService;
   before(function() {
-    namespaceService = namespaceServiceFactory({
-      nuObjectNamespace: 'FOO__',
-      nuClassNamespace: 'FOO.',
-      ncObjectNamespace: 'BAR__'
-    });
+    namespaceService = namespaceServiceFactory({namespaces: {
+      'NU__': 'FOO__',
+      'NU.': 'FOO.',
+      'NC__': 'BAR__'
+    }});
   });
 
   it('Expect all occurances of NU__ namespace replaced', function() {

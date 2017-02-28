@@ -6,18 +6,17 @@
  */
 module.exports = function(config) {
   /**
-   * Replace all occurences of NU__, NU., and NC__ in the passed in raw data
-   * with config.nuObjectNamespace, config.nuClassNamespace, and config.ncObjectNamespace
-   * respectively.
+   * Replace all occurences of keys in the config.namespaces object,
+   * with the corresponding values.
    *
    * @param {object} rawData - The raw json object ready for replacing.
    * @return {object} rawData with fields and values namespaced.
    */
   return function(rawData) {
-    var namespacedString = JSON.stringify(rawData)
-      .split('NU__').join(config.nuObjectNamespace)
-      .split('NU.').join(config.nuClassNamespace)
-      .split('NC__').join(config.ncObjectNamespace);
+    var namespacedString = JSON.stringify(rawData);
+    Object.keys(config.namespaces).forEach(function(namespace) {
+      namespacedString = namespacedString.split(namespace).join(config.namespaces[namespace]);
+    });
     return JSON.parse(namespacedString);
   };
 };
