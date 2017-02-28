@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Entities",
+    "query": "SELECT Id FROM NU__Entity__c",
+    "type": "NU__Entity__c",
+    "id": "Id",
+    "mappings": [
+      {
+        "value": "https://test.authorize.net/gateway/transact.dll",
+        "destColumn": "NU__AuthDotNetAPIEndPointUrl__c"
+      },
+      {
+        "value": "3RK7Q44hbsT7H43u",
+        "destColumn": "NU__AuthDotNetAPITransactionKey__c"
+      },
+      {
+        "value": "76hAzP2a9",
+        "destColumn": "NU__AuthDotNetAPILoginId__c"
+      }
+    ]
+  }
+]

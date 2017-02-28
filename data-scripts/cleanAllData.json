@@ -49,11 +49,9 @@
         "List<User> communityUsers = [SELECT Id FROM User WHERE Profile.UserLicense.Name='Partner Community' OR Profile.UserLicense.Name='Customer Community Login'];",
         "List<User> updateUsers = new List<User>();",
         "for(User u : communityUsers) {",
-        "updateUsers.add(new User(Id=u.Id, IsActive=false, IsPortalEnabled=false));",
+        "updateUsers.add(new User(Id=u.Id, IsActive=false, IsPortalEnabled=false, Country='United States'));",
         "}",
-        "List<Case> cases = [SELECT Id FROM Case];",
-        "update updateUsers;",
-        "delete cases;"
+        "update updateUsers;"
       ]
     },
     {
@@ -62,6 +60,7 @@
         "NU.TriggerHandlerManager.disableTriggerForThisRequest('CommitteeMembershipTrigger');",
         "NU.TriggerHandlerManager.disableTriggerForThisRequest('AffiliationTriggers');",
         "NU.TriggerHandlerManager.disableTriggerForThisRequest('AccountTriggers');",
+        "List<Case> cases = [SELECT Id FROM Case];",
         "List<NU__CommitteeMembership__c> cms = [SELECT Id FROM NU__CommitteeMembership__c];",
         "List<NU__Affiliation__c> afs = [SELECT Id FROM NU__Affiliation__c];",
         "List<Account> acs = [SELECT Id FROM Account];",
@@ -72,6 +71,7 @@
         "List<NU__MembershipType__c> mts = [SELECT Id FROM NU__MembershipType__c];",
         "List<NU__SalesTax__c> sts = [SELECT Id FROM NU__SalesTax__c];",
         "List<NU__ARAging__c> ars = [SELECT Id FROM NU__ARAging__c];",
+        "delete cases;",
         "delete cms;",
         "delete afs;",
         "delete acs;",
