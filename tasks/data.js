@@ -20,9 +20,14 @@ module.exports = function(grunt) {
   };
 
   var getContainer = function() {
-    if (grunt.config('namespaces') instanceof String) {
-      grunt.config('namespaces', JSON.parse(grunt.config('namespaces')));
+    try {
+      var parsed = JSON.parse(grunt.config('namespaces'));
+      grunt.config('namespaces', parsed);
+    } catch (e) {
+      //assuming it is already parsed
+      grunt.config('namespaces', grunt.config('namespaces'));
     }
+
     return containerFactory({
       username: grunt.config('username'),
       password: grunt.config('password'),
@@ -96,7 +101,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('cleanData', 'Pass the data file for cleaning the SF org.', function(path) {
-    if (!readlineSync.keyInYN('username: ' + constants.username + ' Are you sure?')) {
+    if (!grunt.option('forceClean') && !readlineSync.keyInYN('username: ' + grunt.config('username') + ' Are you sure?')) {
       handleError('Aborting');
     }
     if (arguments.length === 0) {
