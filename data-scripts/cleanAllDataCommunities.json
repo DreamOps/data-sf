@@ -46,6 +46,17 @@
     {
       "type": "ApexScript",
       "body": [
+        "List<User> communityUsers = [SELECT Id FROM User WHERE Profile.UserLicense.Name='Partner Community' OR Profile.UserLicense.Name='Customer Community Login'];",
+        "List<User> updateUsers = new List<User>();",
+        "for(User u : communityUsers) {",
+        "updateUsers.add(new User(Id=u.Id, IsActive=false, IsPortalEnabled=false, Country='United States'));",
+        "}",
+        "update updateUsers;"
+      ]
+    },
+    {
+      "type": "ApexScript",
+      "body": [
         "NU.TriggerHandlerManager.disableTriggerForThisRequest('CommitteeMembershipTrigger');",
         "NU.TriggerHandlerManager.disableTriggerForThisRequest('AffiliationTriggers');",
         "NU.TriggerHandlerManager.disableTriggerForThisRequest('AccountTriggers');",
