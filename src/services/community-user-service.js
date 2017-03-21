@@ -25,7 +25,6 @@ module.exports = function(query, recordService, promise, logger) {
       accountId = rec.AccountId;
       var updatedUser = {
           Id: rec.Id,
-          NU__ExternalId__c: rec.Id + '#',
           IsActive: false,
           IsPortalEnabled: false,
           Username: rec.Id + '@example.com',

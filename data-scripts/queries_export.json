@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Queries",
+    "query": "SELECT Id, Name, NU__Limit__c, NU__OrderBy__c, NU__Select__c, NU__SharingMode__c, NU__SObject__c, NU__Where__c FROM NU__Query__c",
+    "type": "NU__Query__c",
+    "id": "NU__ExternalId__c",
+    "mappings": [
+      {
+        "sourceColumn": "Id",
+        "destColumn": "NU__ExternalId__c"
+      }
+    ]
+  }
+]
