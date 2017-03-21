@@ -1,0 +1,35 @@
+{
+  "extId": "NU__ExternalId__c",
+  "queries": [],
+  "records": {},
+  "cleaners": [
+    {
+      "type": "ApexScript",
+      "body": [
+        "String email = 'jjuby+mctesterson@nimbleuser.com';",
+        "String password = 'Honor1234';",
+        "Account a = new Account(LastName='McTesterson', PersonEmail=email);",
+        "insert a;",
+        "User newUser = new User();",
+        "newUser.FirstName = 'Tester';",
+        "newUser.LastName = 'McTesterson';",
+        "newUser.Email = email;",
+        "newUser.Username = email;",
+        "newUser.CommunityNickname = email.substring(0, Math.min(email.length(), User.CommunityNickname.getDescribe().getLength()));",
+        "newUser.Alias = 'testy';",
+        "AccountSelector accountSelector = new AccountSelector();",
+        "Id contactId = accountSelector.selectPersonContactById(new Set<Id> { a.Id })[0].znu__PersonContact__c;",
+        "Id profileId = new ProfileSelector().selectByName(new Set<String> { 'Community Hub Login User' })[0].Id;",
+        "newUser.Id = null;",
+        "newUser.ContactId = contactId;",
+        "newUser.ProfileId = profileId;",
+        "newUser.LocaleSidKey = 'en_US';",
+        "newUser.LanguageLocaleKey = 'en_US';",
+        "newUser.TimeZoneSidKey = TimeZoneUtil.DefaultUserTimeZoneForCommunity;",
+        "newUser.EmailEncodingKey = 'ISO-8859-1';",
+        "insert newUser;",
+        "System.setPassword(newUser.Id, password);"
+      ]
+    }
+  ]
+}
