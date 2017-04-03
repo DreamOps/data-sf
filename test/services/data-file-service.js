@@ -230,18 +230,6 @@ describe('data-file-service', function() {
       expect(jsonArg.extId).to.be.eq(extId);
     });
 
-    it('Expect extId default set', function() {
-      dataFileService.writeDataFile(
-        records,
-        destinationFile,
-        type,
-        null,
-        queries
-      );
-      var jsonArg = JSON.parse(fsMock.writeFile.getCall(0).args[1]);
-      expect(jsonArg.extId).to.be.eq('ExternalID__c');
-    });
-
     it('Expect queries default set', function() {
       dataFileService.writeDataFile(
         records,
