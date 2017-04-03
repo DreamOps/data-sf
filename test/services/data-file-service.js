@@ -7,38 +7,38 @@ var dataFileServiceFactory = require('./../../src/services/data-file-service');
 describe('data-file-service', function() {
 
   var dataFileJson = {
-    'extId': 'NU__ExternalId__c',
+    'extId': 'ExternalId__c',
     'queries': [
       {
           'variable': 'Entity',
-          'query': 'SELECT Id, Name FROM NU__Entity__c WHERE Name LIKE \'Inter%\''
+          'query': 'SELECT Id, Name FROM Entity__c WHERE Name LIKE \'Inter%\''
       },
       {
           'variable': 'GlAccount',
-          'query': 'SELECT Id, Name FROM NU__GLAccount__c WHERE Name LIKE \'01-%\' LIMIT 1'
+          'query': 'SELECT Id, Name FROM GLAccount__c WHERE Name LIKE \'01-%\' LIMIT 1'
       }
     ],
     'records': {
-      'NU__Event__c': [
+      'Event__c': [
         {
           'Name': 'Test Event',
-          'NU__ShortName__c': 'TE',
-          'NU__Status__c': 'Active',
-          'NU__Entity__c': '${Entity.Id}',
-          'NU__StartDate__c': '2016-04-22T08:00:00Z',
-          'NU__EndDate__c': '2016-04-25T08:00:00Z',
-          'NU__ExternalId__c': 'TestEvent'
+          'ShortName__c': 'TE',
+          'Status__c': 'Active',
+          'Entity__c': '${Entity.Id}',
+          'StartDate__c': '2016-04-22T08:00:00Z',
+          'EndDate__c': '2016-04-25T08:00:00Z',
+          'ExternalId__c': 'TestEvent'
         }
       ],
-      'NU__Product__c': [
+      'Product__c': [
         {
           'Name': 'Test Donation Product',
-          'NU__Entity__c': '${Entity.Id}',
-          'NU__DisplayOrder__c': 1,
-          'NU__QuantityMax__c': 1,
-          'NU__ListPrice__c': 10.00,
-          'NU__RevenueGLAccount__c': '${GlAccount.Id}',
-          'NU__ExternalId__c': 'TestDonationProduct'
+          'Entity__c': '${Entity.Id}',
+          'DisplayOrder__c': 1,
+          'QuantityMax__c': 1,
+          'ListPrice__c': 10.00,
+          'RevenueGLAccount__c': '${GlAccount.Id}',
+          'ExternalId__c': 'TestDonationProduct'
         }
       ]
     },
@@ -46,8 +46,8 @@ describe('data-file-service', function() {
       {
         'type': 'ApexScript',
         'body': [
-          'List<NU__Event__c> events = [SELECT Id FROM NU__Event__c WHERE NU__ExternalId__c=\'TestEvent\'];',
-          'List<NU__Product__c> products = [SELECT Id FROM NU__Product__c WHERE NU__ExternalId__c];',
+          'List<Event__c> events = [SELECT Id FROM Event__c WHERE ExternalId__c=\'TestEvent\'];',
+          'List<Product__c> products = [SELECT Id FROM Product__c WHERE ExternalId__c];',
           'delete products;',
           'delete events;'
         ]
@@ -55,8 +55,8 @@ describe('data-file-service', function() {
       {
         'type': 'ApexScript',
         'body': [
-          'List<NU__Event__c> events = [SELECT Id FROM NU__Event__c WHERE NU__ExternalId__c=\'TestEvent\'];',
-          'List<NU__Product__c> products = [SELECT Id FROM NU__Product__c WHERE NU__ExternalId__c];',
+          'List<Event__c> events = [SELECT Id FROM Event__c WHERE ExternalId__c=\'TestEvent\'];',
+          'List<Product__c> products = [SELECT Id FROM Product__c WHERE ExternalId__c];',
           'delete products;',
           'delete events;'
         ]
@@ -98,8 +98,8 @@ describe('data-file-service', function() {
         expect(environmentMock.replaceVariables.calledTwice).to.be.true;
         var firstCall = environmentMock.replaceVariables.getCall(0);
         var secondCall = environmentMock.replaceVariables.getCall(1);
-        expect(firstCall.calledWith(dataFileJson.records.NU__Event__c, {})).to.be.true;
-        expect(secondCall.calledWith(dataFileJson.records.NU__Product__c, {})).to.be.true;
+        expect(firstCall.calledWith(dataFileJson.records.Event__c, {})).to.be.true;
+        expect(secondCall.calledWith(dataFileJson.records.Product__c, {})).to.be.true;
         done();
       });
     });
@@ -110,10 +110,10 @@ describe('data-file-service', function() {
         var firstCall = recordServiceMock.insertRecords.getCall(0);
         var secondCall = recordServiceMock.insertRecords.getCall(1);
         expect(
-          firstCall.calledWith('NU__Event__c', dataFileJson.records.NU__Event__c, dataFileJson.extId)
+          firstCall.calledWith('Event__c', dataFileJson.records.Event__c, dataFileJson.extId)
         ).to.be.true;
         expect(
-          secondCall.calledWith('NU__Product__c', dataFileJson.records.NU__Product__c, dataFileJson.extId)
+          secondCall.calledWith('Product__c', dataFileJson.records.Product__c, dataFileJson.extId)
         ).to.be.true;
         done();
       });
@@ -239,7 +239,7 @@ describe('data-file-service', function() {
         queries
       );
       var jsonArg = JSON.parse(fsMock.writeFile.getCall(0).args[1]);
-      expect(jsonArg.extId).to.be.eq('NU__ExternalID__c');
+      expect(jsonArg.extId).to.be.eq('ExternalID__c');
     });
 
     it('Expect queries default set', function() {

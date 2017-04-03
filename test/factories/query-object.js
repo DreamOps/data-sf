@@ -8,13 +8,13 @@ describe('query-object-factory', function() {
   var queryObjectdata = [{
     'name': 'Batch Export Config',
     'useBulk': true,
-    'query': 'SELECT Id FROM NU__BatchExportConfiguration__c',
-    'type': 'NU__BatchExportConfiguration__c',
-    'id': 'NU__ExternalID__c',
+    'query': 'SELECT Id FROM BatchExportConfiguration__c',
+    'type': 'BatchExportConfiguration__c',
+    'id': 'ExternalID__c',
     'mappings': [
       {
         'sourceColumn': 'Id',
-        'destColumn': 'NU__ExternalID__c'
+        'destColumn': 'ExternalID__c'
       },
       {
         'value': 'bar',
@@ -24,13 +24,13 @@ describe('query-object-factory', function() {
   },
   {
     'name': 'Committee Position',
-    'query': 'SELECT Id FROM NU__CommitteePosition__c',
-    'type': 'NU__CommitteePosition__c',
-    'id': 'NU__ExternalID__c',
+    'query': 'SELECT Id FROM CommitteePosition__c',
+    'type': 'CommitteePosition__c',
+    'id': 'ExternalID__c',
     'mappings': [
       {
         'sourceColumn': 'Id',
-        'destColumn': 'NU__ExternalID__c'
+        'destColumn': 'ExternalID__c'
       },
       {
         'value': 'bar',
@@ -65,12 +65,12 @@ describe('query-object-factory', function() {
           attributes: [{}, 'stuff in here'],
           'Id': 'abc123',
           'Name': 'Test Event',
-          'NU__ShortName__c': 'TE',
-          'NU__Status__c': 'Active',
-          'NU__Entity__c': '${Entity.Id}',
-          'NU__StartDate__c': '2016-04-22T08:00:00Z',
-          'NU__EndDate__c': '2016-04-25T08:00:00Z',
-          'NU__ExternalID__c': 'TestEvent'
+          'ShortName__c': 'TE',
+          'Status__c': 'Active',
+          'Entity__c': '${Entity.Id}',
+          'StartDate__c': '2016-04-22T08:00:00Z',
+          'EndDate__c': '2016-04-25T08:00:00Z',
+          'ExternalID__c': 'TestEvent'
         }
       ];
       queryMock = sinon.stub().resolves(records);
@@ -155,7 +155,7 @@ describe('query-object-factory', function() {
           var value = records[0].Id;
           var newRecord = qObjects[0].doQuery().then(function() {
             var mappedRecord = qObjects[0].records[0];
-            expect(mappedRecord.NU__ExternalID__c).to.be.eq(value);
+            expect(mappedRecord.ExternalID__c).to.be.eq(value);
             done();
           }, function(err) {
             expect(err).to.be.undefined;
@@ -225,7 +225,7 @@ describe('query-object-factory', function() {
 
       it('Expects query called', function(done) {
         var recordTypeQuery = 'SELECT Id, Name FROM RecordType' +
-            ' WHERE SObjectType = \'NU__BatchExportConfiguration__c\' AND IsActive = true';
+            ' WHERE SObjectType = \'BatchExportConfiguration__c\' AND IsActive = true';
         qObjects[0].exportRecordTypes()
         .then(function() {
           expect(queryMock.calledOnce).to.be.true;

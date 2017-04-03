@@ -39,7 +39,7 @@ module.exports = function(grunt) {
     });
   };
 
-  grunt.registerTask('data', 'Pass the data file to be synced to the SF org.', function(path) {
+  grunt.registerTask('import', 'Pass the data file to be synced to the SF org.', function(path) {
     if (arguments.length === 0) {
       handleError(this.name + ' Usage: data:path/to/data/file.json');
     }

@@ -37,7 +37,7 @@ describe('community-user-service', function() {
     it('Expect recordServiceMock called for updating the User', function(done) {
       var updatedUserRecord = {
         Id: 'abc123',
-        NU__ExternalId__c: 'abc123#',
+        ExternalId__c: 'abc123#',
         IsActive: false,
         IsPortalEnabled: false,
         Username: 'abc123@example.com',

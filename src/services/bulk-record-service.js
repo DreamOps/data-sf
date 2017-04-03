@@ -49,8 +49,7 @@ module.exports = function(login, promise, logger) {
       deferred.resolve();
       return deferred.promise;
     }
-    //set externalIds if it is not already set.
-    extId = extId || 'NU__ExternalID__c';
+
     records = records.map(function(record, index) {
       record[extId] = record[extId] || index + 1;
       return record;

@@ -82,7 +82,7 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
   var writeDataFile = function(records, destination, type, extId, queries) {
     var fileJson = JSON.parse(JSON.stringify(templateJson));
     fileJson.records[type] = records;
-    fileJson.extId = extId || 'NU__ExternalID__c';
+    fileJson.extId = extId;
     fileJson.queries = queries || [];
     return fs.writeFile(destination, JSON.stringify(fileJson, null, 2));
   };

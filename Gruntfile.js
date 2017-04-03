@@ -21,14 +21,10 @@ module.exports = function(grunt) {
 
     // Configuration to be run (and then tested).
     nimbleforce: {
-      username: 'kzn-46@nu.dev',
-      password: 'Honor1234',
+      username: 'username@example.com',
+      password: 'password',
       sfUrl: 'https://login.salesforce.com',
-      namespaces: {
-        'NU__': 'NU__',
-        'NC__': 'NC__',
-        'NU.': 'NU.'
-      },
+      namespaces: {},
       useBulkAPI: true
     },
     jscs: {

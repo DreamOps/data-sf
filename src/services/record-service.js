@@ -41,7 +41,6 @@ module.exports = function(login, promise, logger) {
    */
   var insertRecords = function(type, records, extId) {
     var deferred = new promise.Deferred();
-    extId = extId || 'NU__ExternalID__c';
     var fnArray = records.map(function(record, index) {
       record[extId] = record[extId] || index + 1;
       return function() {
