@@ -56,6 +56,14 @@ module.exports = function(login, promise, logger) {
       return record;
     });
 
+    //empty relationship fields must be empty string
+    var relationshipFields = Object.keys(records[0]).filter(x => x.includes('.'));
+    relationshipFields.forEach(f => {
+      records.forEach(record => {
+        record[f] = record[f] || '';
+      });
+    });
+
     //map the relationship fields for the bulk API
     records = mapRelationshipFields(records);
 

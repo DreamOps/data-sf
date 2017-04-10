@@ -16,6 +16,7 @@ module.exports = function(username, password, url) {
     dataFileService: container.get('data-file-service'),
     communityUserService: container.get('community-user-service'),
     recordService: container.get('record-service'),
-    namespaceService: container.get('namespace-service')
+    namespaceService: container.get('namespace-service'),
+    mappingService: container.get('mapping-service')
   };
 };

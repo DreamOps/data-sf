@@ -14,6 +14,7 @@ module.exports = function(grunt) {
   grunt.config('instanceUrl', grunt.option('instanceUrl'));
   grunt.config('jwt', grunt.option('jwt'));
   grunt.config('namespaces', grunt.option('namespaces') || constants.namespaces);
+  grunt.config('standardObjectWhitelist', grunt.option('standardObjectWhitelist') || constants.standardObjectWhitelist);
 
   var handleError = function(err) {
     grunt.fail.fatal(err);
@@ -35,7 +36,8 @@ module.exports = function(grunt) {
       instanceUrl: grunt.config('instanceUrl'),
       jwt: grunt.config('jwt'),
       namespaces: grunt.config('namespaces'),
-      useBulkAPI: grunt.config('useBulkAPI')
+      useBulkAPI: grunt.config('useBulkAPI'),
+      standardObjectWhitelist: grunt.config('standardObjectWhitelist')
     });
   };
 
@@ -140,5 +142,18 @@ module.exports = function(grunt) {
         done();
       }, handleError);
     }
+  });
+
+  grunt.registerTask('mapping', 'Generates a mapping for an org.', function(path) {
+    if (arguments.length < 1) {
+      handleError(this.name + ' Usage: mapping:path/to/destination/file.json');
+    }
+
+    var done = this.async();
+    var mappingService = getContainer().get('mapping-service');
+
+    mappingService.map(path).then(function() {
+      done();
+    }, handleError);
   });
 };
