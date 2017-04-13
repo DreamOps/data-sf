@@ -197,6 +197,7 @@ module.exports = function(config, connection, jsforcePartnerService, _, fs) {
             query: 'SELECT Id, ' + pass.fields.map(f => f.name).join(', ') + ' FROM ' + pass.type + whereClause,
             type: pass.type,
             id: pass.externalId,
+            useBulk: true,
             mappings: [{
                 'sourceColumn': 'Id',
                 'destColumn': pass.externalId
