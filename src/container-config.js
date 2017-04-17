@@ -10,6 +10,7 @@ var jsforce = require('jsforce');
 var promise = require('promised-io/promise');
 var fs = require('promised-io/fs');
 var util = require('util');
+var lodash = require('lodash');
 var connectionService = require('./services/connection-service');
 var queryService = require('./services/query-service');
 var apexService = require('./services/apex-service');
@@ -22,6 +23,9 @@ var bulkRecordService = require('./services/bulk-record-service');
 var exportService = require('./services/export-service');
 var queryObjectFactory = require('./factories/query-object');
 var bulkQueryService = require('./services/bulk-query-service');
+var jsforcePartnerService = require('./services/jsforce-partner-service.js');
+var mappingService = require('./services/mapping-service.js');
+var SOAP = require('../node_modules/jsforce/lib/soap');
 
 /**
  * Container is a factory function as well.
@@ -60,6 +64,12 @@ module.exports = function(config) {
   container.register('util', [], function() {
     return util;
   });
+  container.register('lodash', [], function() {
+    return lodash;
+  });
+  container.register('SOAP', [], function() {
+    return SOAP;
+  });
   container.register('logger', [], function() {
     return function(logMe) {
       console.log(logMe);
@@ -87,5 +97,8 @@ module.exports = function(config) {
         dataFileService);
   }
   container.register('export-service', ['connection', 'data-file-service', 'promise'], exportService);
+  container.register('jsforce-partner-service', ['SOAP', 'connection'], jsforcePartnerService);
+  container.register('mapping-service', ['config', 'connection', 'jsforce-partner-service', 'lodash', 'fs'],
+      mappingService);
   return container;
 };

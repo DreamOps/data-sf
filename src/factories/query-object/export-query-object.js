@@ -66,9 +66,14 @@ module.exports = function(QueryObject, query, promise) {
     return deferred.promise;
   };
 
+  function encodeRecordTypeName(recordTypeName) {
+    // period in record type name interferes with variable syntax
+    return recordTypeName.replace(/\./g, '*');
+  }
+
   ExportQueryObject.prototype.createRecordTypeQueryObject = function(name) {
     var queryString = getRecordTypeQuery(this.getType(), name);
-    return {variable: name + 'RT', query: queryString};
+    return {variable: encodeRecordTypeName(name) + 'RT', query: queryString};
   };
 
   /**
