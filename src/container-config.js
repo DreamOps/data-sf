@@ -25,6 +25,7 @@ var queryObjectFactory = require('./factories/query-object');
 var bulkQueryService = require('./services/bulk-query-service');
 var jsforcePartnerService = require('./services/jsforce-partner-service.js');
 var mappingService = require('./services/mapping-service.js');
+var SOAP = require('../node_modules/jsforce/lib/soap');
 
 /**
  * Container is a factory function as well.
@@ -66,6 +67,9 @@ module.exports = function(config) {
   container.register('lodash', [], function() {
     return lodash;
   });
+  container.register('SOAP', [], function() {
+    return SOAP;
+  });
   container.register('logger', [], function() {
     return function(logMe) {
       console.log(logMe);
@@ -93,7 +97,7 @@ module.exports = function(config) {
         dataFileService);
   }
   container.register('export-service', ['connection', 'data-file-service', 'promise'], exportService);
-  container.register('jsforce-partner-service',  [], jsforcePartnerService);
+  container.register('jsforce-partner-service', ['SOAP', 'connection'], jsforcePartnerService);
   container.register('mapping-service', ['config', 'connection', 'jsforce-partner-service', 'lodash', 'fs'],
       mappingService);
   return container;

@@ -1,0 +1,39 @@
+{
+  "encoding": "UTF-8",
+  "maxBatchSize": 200,
+  "sobjects": [
+    {
+      "activateable": false,
+      "createable": true,
+      "custom": true,
+      "customSetting": false,
+      "deletable": true,
+      "deprecatedAndHidden": false,
+      "feedEnabled": false,
+      "keyPrefix": "a06",
+      "label": "Batch Export Configuration",
+      "labelPlural": "Batch Export Configurations",
+      "layoutable": true,
+      "mergeable": false,
+      "mruEnabled": true,
+      "name": "NU__BatchExportConfiguration__c",
+      "queryable": true,
+      "replicateable": true,
+      "retrieveable": true,
+      "searchable": true,
+      "triggerable": true,
+      "undeletable": true,
+      "updateable": true,
+      "urls": {
+        "compactLayouts": "/services/data/v37.0/sobjects/NU__BatchExportConfiguration__c/describe/compactLayouts",
+        "rowTemplate": "/services/data/v37.0/sobjects/NU__BatchExportConfiguration__c/{ID}",
+        "approvalLayouts": "/services/data/v37.0/sobjects/NU__BatchExportConfiguration__c/describe/approvalLayouts",
+        "defaultValues": "/services/data/v37.0/sobjects/NU__BatchExportConfiguration__c/defaultValues?recordTypeId&fields",
+        "describe": "/services/data/v37.0/sobjects/NU__BatchExportConfiguration__c/describe",
+        "quickActions": "/services/data/v37.0/sobjects/NU__BatchExportConfiguration__c/quickActions",
+        "layouts": "/services/data/v37.0/sobjects/NU__BatchExportConfiguration__c/describe/layouts",
+        "sobject": "/services/data/v37.0/sobjects/NU__BatchExportConfiguration__c"
+      }
+    }
+  ]
+}

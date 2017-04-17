@@ -1,3 +1,14 @@
+/**
+ * Factory function for the mapping service.
+ * Generates a export file for a custom schema.
+ *
+ * @param {object} config - configuration object.
+ * @param {function} connection - login-service.
+ * @param {object} jsforcePartnerService - jsforce-partner-service
+ * @param {object} _ - lodash.
+ * @param {object} fs - node fs package.
+ * @return {object} mapping-service
+ */
 module.exports = function(config, connection, jsforcePartnerService, _, fs) {
 
     var standardObjectWhitelistSet = toSet(config.standardObjectWhitelist || []);
@@ -276,8 +287,7 @@ module.exports = function(config, connection, jsforcePartnerService, _, fs) {
             // Get the detailed sobject describe in chunks
             var objNames = result.describe.sobjects.map(x => x.name);
             var objNameChunks = _.chunk(objNames, 100);
-            var partnerService = jsforcePartnerService.create(result.conn);
-            return Promise.all(objNameChunks.map(x => partnerService.describeSObjects(x)));
+            return Promise.all(objNameChunks.map(x => jsforcePartnerService.describeSObjects(x)));
 
         }).then(function(results) {
             var describes = _.flatten(results).filter(describe => shouldIncludeObject(describe));
