@@ -233,8 +233,8 @@ module.exports = function(config, connection, jsforcePartnerService, _, fs) {
             personFields.push({name: 'PersonContactId'});
         }
 
-        var accountFilter = 'IsPersonAccount = false';
-        var personFilter = 'IsPersonAccount = true';
+        var accountFilter = 'IsPersonAccount = false AND NU__SandboxEnabled__c = true';
+        var personFilter = 'IsPersonAccount = true AND NU__SandboxEnabled__c = true';
 
         var accountPass = buildPassJSON({
             name: pass.name,
@@ -359,6 +359,14 @@ module.exports = function(config, connection, jsforcePartnerService, _, fs) {
                         // Just exclude person account records
                         pass.filter = 'Account.IsPersonAccount = false';
                     }
+                }
+
+                var accountRFields = pass.fields.filter(isRelationship).filter(f => f.referenceTo === 'Account');
+
+                if (accountRFields.length > 0) {
+                    pass.filter = pass.filter ? pass.filter + ' AND ' : '';
+                    pass.filter +=
+                        accountRFields.map(f => f.relationshipName + '.NU__SandboxEnabled__c = true').join(' AND ');
                 }
 
                 results.push(buildPassJSON(pass, passes));

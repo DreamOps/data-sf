@@ -103,7 +103,8 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('cleanData', 'Pass the data file for cleaning the SF org.', function(path) {
-    if (!grunt.option('forceClean') && !readlineSync.keyInYN('username: ' + grunt.config('username') + ' Are you sure?')) {
+    if (!grunt.option('forceClean') &&
+      !readlineSync.keyInYN('username: ' + grunt.config('username') + ' Are you sure?')) {
       handleError('Aborting');
     }
     if (arguments.length === 0) {
