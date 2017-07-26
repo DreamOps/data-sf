@@ -29,6 +29,12 @@ module.exports = function(grunt) {
       grunt.config('namespaces', grunt.config('namespaces'));
     }
 
+    if (grunt.option('znu')) {
+      grunt.config('namespaces', {'NU__': 'znu__', 'NC__': '', 'NU.': 'znu.'});
+    } else if (grunt.option('dev')) {
+      grunt.config('namespaces', {'NU__': '', 'NC__': '', 'NU.': ''});
+    }
+
     return containerFactory({
       username: grunt.config('username'),
       password: grunt.config('password'),
