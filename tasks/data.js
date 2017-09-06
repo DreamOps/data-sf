@@ -1,5 +1,6 @@
 var containerFactory = require('../src/container-config');
 var readlineSync = require('readline-sync');
+var fs = require ('fs');
 /**
  * Task definitions for the data/cleanData tasks.
  *
@@ -68,11 +69,20 @@ module.exports = function(grunt) {
 
       var fnArray = data.order.map(function(filename) {
         var pathToFile = path + '/' + filename;
-        var thisData = namespaceJSON(grunt.file.readJSON(pathToFile));
-        return function() {
-          console.log(filename);
-          return dataFileService.processData(thisData);
-        };
+        if(filename.toLowerCase().endsWith('.json')){
+          var thisData = namespaceJSON(grunt.file.readJSON(pathToFile));
+          return function() {
+            console.log(filename);
+            return dataFileService.processData(thisData);
+          };
+        } else if(filename.toLowerCase().endsWith('.js')) {
+          var realPath = fs.realpathSync(pathToFile);
+          return function() {
+            console.log(filename);
+            var thisFunction = require(realPath);
+            return thisFunction(container);
+          }
+        }
       });
       seq(fnArray).then(function(results) {
         done();
