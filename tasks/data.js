@@ -34,6 +34,8 @@ module.exports = function(grunt) {
       grunt.config('namespaces', {'NU__': 'znu__', 'NC__': '', 'NU.': 'znu.'});
     } else if (grunt.option('dev')) {
       grunt.config('namespaces', {'NU__': '', 'NC__': '', 'NU.': ''});
+    } else if (grunt.option('packaged')) {
+      grunt.config('namespaces', {'NU__': 'NU__', 'NC__': 'NC__', 'NU.': 'NU.'});
     }
 
     return containerFactory({
