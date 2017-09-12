@@ -173,4 +173,21 @@ module.exports = function(grunt) {
       done();
     }, handleError);
   });
+
+  grunt.registerTask('obfuscateEmails', 'Pass the directory for file to have emails obfuscated.', function(path) {
+    if (arguments.length === 0) {
+      handleError(this.name + ' Usage: obfuscateEmails:path/to/data/');
+    }
+
+    var container = getContainer();
+    var seq = container.get('promise').seq;
+    var dataFileService = container.get('data-file-service');
+
+    var data = grunt.file.recurse(path, function(abspath, rootdir, subdir, filename) {
+      var rawData = grunt.file.readJSON(abspath);
+      var newRawData = dataFileService.obfuscateEmails(rawData);
+      var fileData = JSON.stringify(newRawData, null, 2);
+      grunt.file.write(abspath, fileData);
+    });
+  });
 };

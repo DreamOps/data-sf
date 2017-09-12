@@ -36,6 +36,12 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
     return deferred.promise;
   };
 
+  var obfuscateEmails = function(rawData) {
+    var data = JSON.stringify(rawData);
+    var res = data.split('@').join('@zzz');
+    return JSON.parse(res);
+  };
+
   /**
    * Process a list of json records for cleaning a SF org.
    *
@@ -104,6 +110,7 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
     processData: processData,
     cleanData: cleanData,
     writeDataFile: writeDataFile,
-    writeManifestFile: writeManifestFile
+    writeManifestFile: writeManifestFile,
+    obfuscateEmails: obfuscateEmails
   };
 };
