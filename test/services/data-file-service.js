@@ -74,7 +74,8 @@ describe('data-file-service', function() {
         replaceVariables: sinon.stub().returnsArg(0)
       };
       recordServiceMock = {
-        insertRecords: sinon.stub().resolves({})
+        insertRecords: sinon.stub().resolves({}),
+        upsertRecords: sinon.stub().resolves({})
       };
       dataFileService = dataFileServiceFactory(
         environmentMock,
@@ -104,11 +105,11 @@ describe('data-file-service', function() {
       });
     });
 
-    it('Expect recordServiceMock.insertRecords called twice', function(done) {
+    it('Expect recordServiceMock.upsertRecords called twice', function(done) {
       dataFileService.processData(dataFileJson).then(function() {
-        expect(recordServiceMock.insertRecords.calledTwice).to.be.true;
-        var firstCall = recordServiceMock.insertRecords.getCall(0);
-        var secondCall = recordServiceMock.insertRecords.getCall(1);
+        expect(recordServiceMock.upsertRecords.calledTwice).to.be.true;
+        var firstCall = recordServiceMock.upsertRecords.getCall(0);
+        var secondCall = recordServiceMock.upsertRecords.getCall(1);
         expect(
           firstCall.calledWith('NU__Event__c', dataFileJson.records.NU__Event__c, dataFileJson.extId)
         ).to.be.true;
@@ -133,9 +134,94 @@ describe('data-file-service', function() {
       });
     });
 
+    it('Expect promise rejection when upsertRecords rejects', function(done) {
+      recordServiceMock.upsertRecords.reset().rejects('this is an error');
+      dataFileService.processData(dataFileJson).then(function() {
+        expect(false).to.be.true;
+        done();
+      }, function(reason) {
+        expect(reason.message).to.be.equal('this is an error');
+        expect(environmentMock.buildEnvironment.called).to.be.true;
+        expect(environmentMock.replaceVariables.called).to.be.true;
+        expect(recordServiceMock.upsertRecords.called).to.be.true;
+        done();
+      });
+    });
+  });
+
+  describe('processDataInsert', function() {
+    var dataFileService;
+    var environmentMock;
+    var recordServiceMock;
+    beforeEach(function() {
+      environmentMock = {
+        buildEnvironment: sinon.stub().resolves({}),
+        replaceVariables: sinon.stub().returnsArg(0)
+      };
+      recordServiceMock = {
+        insertRecords: sinon.stub().resolves({}),
+        upsertRecords: sinon.stub().resolves({})
+      };
+      dataFileService = dataFileServiceFactory(
+        environmentMock,
+        recordServiceMock,
+        null,
+        promise
+      );
+    });
+
+    it('Expect environmentMock.buildEnvironment called', function(done) {
+      dataFileService.processDataInsert(dataFileJson).then(function() {
+        expect(
+          environmentMock.buildEnvironment.calledWith(dataFileJson.queries)
+        ).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect environmentMock.replaceVariables called twice', function(done) {
+      dataFileService.processDataInsert(dataFileJson).then(function() {
+        expect(environmentMock.replaceVariables.calledTwice).to.be.true;
+        var firstCall = environmentMock.replaceVariables.getCall(0);
+        var secondCall = environmentMock.replaceVariables.getCall(1);
+        expect(firstCall.calledWith(dataFileJson.records.NU__Event__c, {})).to.be.true;
+        expect(secondCall.calledWith(dataFileJson.records.NU__Product__c, {})).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect recordServiceMock.insertRecords called twice', function(done) {
+      dataFileService.processDataInsert(dataFileJson).then(function() {
+        expect(recordServiceMock.insertRecords.calledTwice).to.be.true;
+        var firstCall = recordServiceMock.insertRecords.getCall(0);
+        var secondCall = recordServiceMock.insertRecords.getCall(1);
+        expect(
+          firstCall.calledWith('NU__Event__c', dataFileJson.records.NU__Event__c, dataFileJson.extId)
+        ).to.be.true;
+        expect(
+          secondCall.calledWith('NU__Product__c', dataFileJson.records.NU__Product__c, dataFileJson.extId)
+        ).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect promise rejection when buildEnvironment rejects', function(done) {
+      environmentMock.buildEnvironment.reset().rejects('this is an error');
+      dataFileService.processDataInsert(dataFileJson).then(function() {
+        expect(false).to.be.true;
+        done();
+      }, function(reason) {
+        expect(reason.message).to.be.equal('this is an error');
+        expect(environmentMock.buildEnvironment.called).to.be.true;
+        expect(environmentMock.replaceVariables.called).to.be.false;
+        expect(recordServiceMock.insertRecords.called).to.be.false;
+        done();
+      });
+    });
+
     it('Expect promise rejection when insertRecords rejects', function(done) {
       recordServiceMock.insertRecords.reset().rejects('this is an error');
-      dataFileService.processData(dataFileJson).then(function() {
+      dataFileService.processDataInsert(dataFileJson).then(function() {
         expect(false).to.be.true;
         done();
       }, function(reason) {

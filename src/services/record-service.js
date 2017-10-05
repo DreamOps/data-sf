@@ -8,6 +8,51 @@
  */
 module.exports = function(login, promise, logger) {
   /**
+   * Insert a json record.
+   *
+   * @param {string} type - The SobjectType that we are inserting.
+   * @param {object} record - The json record to be inserted.
+   * @return {object} Promise that resolves with the result of the upsert.
+   */
+  var insertRecord = function(type, record) {
+    var deferred = new promise.Deferred();
+    login().then(function(connection) {
+      connection.sobject(type).insert(record, function(err, res2) {
+        if (err) {
+          logger('Insert Failure: ' + type + ' ' + err);
+          deferred.resolve(err);
+        } else {
+          logger('Insert success: ' + type);
+          deferred.resolve(res2);
+        }
+      });
+    });
+    return deferred.promise;
+  };
+
+  /**
+   * Insterting a list of json records.
+   *
+   * @param {string} type - The SobjectType that we are inserting.
+   * @param {array} records - The array of json records to be inserted.
+   * @return {object} Promise that resolves when all records have been inserted.
+   */
+  var insertRecords = function(type, records) {
+    var deferred = new promise.Deferred();
+    var fnArray = records.map(function(record, index) {
+      return function() {
+        return insertRecord(type, record);
+      };
+    });
+    promise.seq(fnArray).then(function(results) {
+      deferred.resolve(results);
+    }, function(err) {
+      deferred.reject(err);
+    });
+    return deferred.promise;
+  };
+
+  /**
    * Upserting a json record.
    *
    * @param {string} type - The SobjectType that we are inserting.
@@ -15,7 +60,7 @@ module.exports = function(login, promise, logger) {
    * @param {string} extId - External Id field for the json passed in for record.
    * @return {object} Promise that resolves with the result of the upsert.
    */
-  var insertRecord = function(type, record, extId) {
+  var upsertRecord = function(type, record, extId) {
     var deferred = new promise.Deferred();
     login().then(function(connection) {
       connection.sobject(type).upsert(record, extId, function(err, res2) {
@@ -39,13 +84,13 @@ module.exports = function(login, promise, logger) {
    * @param {string} extId - External Id field for the json passed in for records.
    * @return {object} Promise that resolves when all records have been inserted.
    */
-  var insertRecords = function(type, records, extId) {
+  var upsertRecords = function(type, records, extId) {
     var deferred = new promise.Deferred();
     extId = extId || 'NU__ExternalID__c';
     var fnArray = records.map(function(record, index) {
       record[extId] = record[extId] || index + 1;
       return function() {
-        return insertRecord(type, record, extId);
+        return upsertRecord(type, record, extId);
       };
     });
     promise.seq(fnArray).then(function(results) {
@@ -55,7 +100,6 @@ module.exports = function(login, promise, logger) {
     });
     return deferred.promise;
   };
-
   /**
    * Deleting an Sobject.
    *
@@ -78,7 +122,8 @@ module.exports = function(login, promise, logger) {
   return {
     insertRecord: insertRecord,
     insertRecords: insertRecords,
+    upsertRecords: upsertRecords,
     deleteRecord: deleteRecord,
-    upsertRecord: insertRecord
+    upsertRecord: upsertRecord
   };
 };

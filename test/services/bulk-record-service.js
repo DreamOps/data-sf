@@ -171,4 +171,115 @@ describe('bulk-record-service', function() {
       });
     });
   });
+  describe('upsertRecords', function() {
+    var bulkRecordService;
+    var loginMock;
+    var connectionMock;
+    var createJobMock;
+    var records;
+    var jobMock;
+    var batchMock;
+    beforeEach(function() {
+      records = [{Id: 1},{Id: 2}];
+      batchMock = {
+        on: sinon.stub().callsArgWith(1, {jobId: 1, batchId: 'abc123'}),
+        poll: sinon.stub(),
+        execute: sinon.stub()
+      };
+      var jobInfo = {
+        object: 'Account',
+        numberBatchesTotal: '1',
+        numberRecordsProcessed: '2',
+        totalProcessingTime: '1303'
+      };
+      jobMock = {
+        createBatch: sinon.stub().returns(batchMock),
+        on: sinon.stub().callsArgWith(1, jobInfo),
+        close: sinon.stub()
+      };
+      createJobMock = sinon.stub().returns(jobMock);
+      connectionMock = {
+        bulk: {
+          createJob: createJobMock
+        }
+      };
+      loginMock = sinon.stub().resolves(connectionMock);
+      bulkRecordService = bulkRecordServiceFactory(loginMock, promise, testLogger);
+    });
+
+    it('Expect loginMock called', function(done) {
+      bulkRecordService.upsertRecords('Account', records, 'externalId')
+      .then(function() {
+        expect(loginMock.calledOnce).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect batchMock.on called with queue', function(done) {
+      bulkRecordService.upsertRecords('Account', records, 'externalId')
+      .then(function() {
+        expect(batchMock.on.calledWith('queue')).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect batchMock.poll called with correct timeouts', function(done) {
+      bulkRecordService.upsertRecords('Account', records, 'externalId')
+      .then(function() {
+        expect(batchMock.poll.calledWith(1000, 500000)).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect batchMock.execute called with records', function(done) {
+      bulkRecordService.upsertRecords('Account', records, 'externalId')
+      .then(function() {
+        expect(batchMock.execute.calledWith(records)).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect jobMock.createBatch called', function(done) {
+      bulkRecordService.upsertRecords('Account', records, 'externalId')
+      .then(function() {
+        expect(jobMock.createBatch.called).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect jobMock.on called', function(done) {
+      bulkRecordService.upsertRecords('Account', records, 'externalId')
+      .then(function() {
+        expect(jobMock.on.calledWith('close')).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect jobMock.close called', function(done) {
+      batchMock.execute.callsArgWith(1, null, []);
+      bulkRecordService.upsertRecords('Account', records, 'externalId')
+      .then(function() {
+        expect(jobMock.close.called).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect promise rejected when batchMock.execute calls with error', function(done) {
+      batchMock.execute.callsArgWith(1, 'error', null);
+      jobMock.on.reset();
+      bulkRecordService.upsertRecords('Account', records, 'externalId')
+      .then(function() {
+        expect(false).to.be.true;
+        done();
+      }, function(reason) {
+        expect(reason).to.be.equal('error');
+        expect(jobMock.close.called).to.be.false;
+        expect(jobMock.createBatch.called).to.be.true;
+        expect(batchMock.execute.calledWith(records)).to.be.true;
+        expect(batchMock.poll.calledWith(1000, 500000)).to.be.true;
+        expect(batchMock.on.calledWith('queue')).to.be.true;
+        done();
+      });
+    });
+  });
 });
