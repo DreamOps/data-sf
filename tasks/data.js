@@ -1,6 +1,6 @@
 var containerFactory = require('../src/container-config');
 var readlineSync = require('readline-sync');
-var fs = require ('fs');
+var fs = require('fs');
 /**
  * Task definitions for the data/cleanData tasks.
  *
@@ -50,11 +50,8 @@ module.exports = function(grunt) {
     });
   };
 
-  grunt.registerTask('data', 'Pass the data file to be synced to the SF org.', function(path) {
-    if (arguments.length === 0) {
-      handleError(this.name + ' Usage: data:path/to/data/file.json');
-    }
-    var done = this.async();
+  var sendData = function(path, insert, runner) {
+    var done = runner.async();
 
     var container = getContainer();
     var seq = container.get('promise').seq;
@@ -71,30 +68,58 @@ module.exports = function(grunt) {
 
       var fnArray = data.order.map(function(filename) {
         var pathToFile = path + '/' + filename;
-        if(filename.toLowerCase().endsWith('.json')){
+        if (filename.toLowerCase().endsWith('.json')) {
           var thisData = namespaceJSON(grunt.file.readJSON(pathToFile));
           return function() {
             console.log(filename);
+            if (insert) {
+              return dataFileService.processDataInsert(thisData);
+            }
             return dataFileService.processData(thisData);
           };
-        } else if(filename.toLowerCase().endsWith('.js')) {
+        } else if (filename.toLowerCase().endsWith('.js')) {
           var realPath = fs.realpathSync(pathToFile);
           return function() {
             console.log(filename);
             var thisFunction = require(realPath);
             return thisFunction(container);
-          }
+          };
         }
       });
       seq(fnArray).then(function(results) {
         done();
       }, handleError);
-    } else {
+    } else if (insert) {
       data = namespaceJSON(data);
+      dataFileService.processDataInsert(data).then(function(results) {
+        done();
+      }, handleError);
+    } else {
       dataFileService.processData(data).then(function(results) {
         done();
       }, handleError);
     }
+  };
+
+  grunt.registerTask('upsert', 'Pass the data file to be synced to the SF org.', function(path) {
+    if (arguments.length === 0) {
+      handleError(this.name + ' Usage: upsert:path/to/data/file.json');
+    }
+    sendData(path,false,this);
+  });
+
+  grunt.registerTask('insert', 'Pass the data file to be synced to the SF org.', function(path) {
+    if (arguments.length === 0) {
+      handleError(this.name + ' Usage: insert:path/to/data/file.json');
+    }
+    sendData(path,true,this);
+  });
+
+  grunt.registerTask('data', 'Pass the data file to be synced to the SF org.', function(path) {
+    if (arguments.length === 0) {
+      handleError(this.name + ' Usage: data:path/to/data/file.json');
+    }
+    sendData(path,false,this);
   });
 
   grunt.registerTask('export', 'Pass the queries file of data to export.', function(path, dest) {

@@ -49,12 +49,6 @@ module.exports = function(login, promise, logger) {
       deferred.resolve();
       return deferred.promise;
     }
-    //set externalIds if it is not already set.
-    extId = extId || 'NU__ExternalID__c';
-    records = records.map(function(record, index) {
-      record[extId] = record[extId] || index + 1;
-      return record;
-    });
 
     //empty relationship fields must be empty string
     var relationshipFields = Object.keys(records[0]).filter(x => x.includes('.'));
@@ -68,7 +62,61 @@ module.exports = function(login, promise, logger) {
     records = mapRelationshipFields(records);
 
     login().then(function(conn) {
-      var job = conn.bulk.createJob(type, 'upsert', {extIdField: extId});
+      var job = conn.bulk.createJob(type, 'insert');
+      executeJob(type, records, job, deferred);
+    });
+    return deferred.promise;
+  };
+
+    /**
+     * upserting a list of json records using the bulk API.
+     *
+     * @param {string} type - The SobjectType that we are inserting.
+     * @param {array} records - The array of json records to be inserted.
+     * @param {string} extId - External Id field for the json passed in for records.
+     * @return {object} Promise that resolves when all records have been inserted.
+     */
+    var upsertRecords = function(type, records, extId) {
+      var deferred = new promise.Deferred();
+      if (records.length < 1) {
+        logger('Empty records, nothing to do');
+        deferred.resolve();
+        return deferred.promise;
+      }
+      //set externalIds if it is not already set.
+      extId = extId || 'NU__ExternalID__c';
+      records = records.map(function(record, index) {
+        record[extId] = record[extId] || index + 1;
+        return record;
+      });
+
+      //empty relationship fields must be empty string
+      var relationshipFields = Object.keys(records[0]).filter(x => x.includes('.'));
+      relationshipFields.forEach(f => {
+        records.forEach(record => {
+          record[f] = record[f] || '';
+        });
+      });
+
+      //map the relationship fields for the bulk API
+      records = mapRelationshipFields(records);
+
+      login().then(function(conn) {
+        var job = conn.bulk.createJob(type, 'upsert', {extIdField: extId});
+        executeJob(type, records, job, deferred);
+      });
+      return deferred.promise;
+    };
+
+    /**
+    * Executes the jobs created by the insertRecord and upsertRecord function
+    *
+    * @param {string} type - The SobjectType that we are inserting.
+    * @param {array} records - The array of json records to be inserted.
+    * @param {object} job - Job to be executed by Bulk API
+    * @param {object} deferred = Promise object to be resolved
+    */
+    var executeJob = function(type, records, job, deferred) {
       var batch = job.createBatch();
       batch.on('queue', function(batchInfo) {
         //poll the batch every second, timeout after 200s
@@ -102,12 +150,11 @@ module.exports = function(login, promise, logger) {
         logger('Job errord' + error);
         return deferred.reject(error);
       });
-    });
-    return deferred.promise;
-  };
+    };
 
   return {
     insertRecords: insertRecords,
+    upsertRecords: upsertRecords,
     mapRelationshipFields: mapRelationshipFields
   };
 };
