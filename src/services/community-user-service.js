@@ -21,6 +21,10 @@ module.exports = function(query, recordService, promise, logger) {
     var userQuery = 'SELECT Id, AccountId FROM User WHERE Username = \'' + username + '\'';
     var accountId;
     query(userQuery).then(function(res) {
+      if (res.length == 0) {
+        deferred.resolve();
+        return;
+      }
       var rec = res[0];
       accountId = rec.AccountId;
       var updatedUser = {
