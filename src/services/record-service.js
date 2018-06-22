@@ -6,7 +6,7 @@
  * @param {function} logger - Function that logs a passed in string.
  * @return {object} record-service provides functions for managing SObject records.
  */
-module.exports = function(login, promise, logger) {
+module.exports = function(login, promise, logger, jsforcePartnerService, _) {
   /**
    * Insert a json record.
    *
@@ -85,20 +85,61 @@ module.exports = function(login, promise, logger) {
    * @return {object} Promise that resolves when all records have been inserted.
    */
   var upsertRecords = function(type, records, extId) {
-    var deferred = new promise.Deferred();
     extId = extId || 'NU__ExternalID__c';
-    var fnArray = records.map(function(record, index) {
-      record[extId] = record[extId] || index + 1;
-      return function() {
-        return upsertRecord(type, record, extId);
-      };
+
+    return jsforcePartnerService.describeSObjects([type]).then(function(describe) {
+      records = records.map(function(record, index) {
+        var result = {'type': type};
+        _.forOwn(record, function(value, key) {
+          if (value === null || value === undefined || value === '') {
+            result[key] = {'@xsi:nil': 'true'};
+          } else {
+            if (key.indexOf('.') == -1) {
+              result[key] = value;
+            } else {
+              var split = key.split('.');
+              var lookupField = split[0];
+              var idField = split[1];
+              var fieldDescribe = describe.fields.find(function(field) {
+                return field.relationshipName === lookupField;
+              });
+              if (!fieldDescribe) {
+                throw 'Unknown field: ' + lookupField;
+              }
+              if (!fieldDescribe.referenceTo) {
+                throw 'Field is not a relationship: ' + lookupField;
+              }
+              result[lookupField] = {
+                type: fieldDescribe.referenceTo,
+                [idField]: value
+              };
+            }
+          }
+        });
+        result[extId] = record[extId] || index + 1;
+        return result;
+      });
+
+      var chunks = _.chunk(records, 200);
+      var index = 0;
+      var fnArray = chunks.map(function(chunk) {
+        return function() {
+          return jsforcePartnerService.upsert(extId, chunk).then(function(results) {
+            results.forEach(function(result) {
+              if (result.success) {
+                logger(type + ' ' + (++index) + ' loaded successfully, id = ' + result.id);
+              } else {
+                logger(type + ' ' + (++index) + ' error occurred, message = ' +
+                    result.errors.map(e => e.message).join(', '));
+              }
+            });
+          }, function(err) {
+            logger(err);
+          });
+        };
+      });
+      return promise.seq(fnArray);
     });
-    promise.seq(fnArray).then(function(results) {
-      deferred.resolve(results);
-    }, function(err) {
-      deferred.reject(err);
-    });
-    return deferred.promise;
   };
   /**
    * Deleting an Sobject.
