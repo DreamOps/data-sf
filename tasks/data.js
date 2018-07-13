@@ -8,10 +8,14 @@ var fs = require('fs');
  */
 module.exports = function(grunt) {
   var constants = grunt.config.get('nimbleforce');
+  var useBulkAPI = grunt.option('useBulkAPI');
+  if (useBulkAPI === undefined || useBulkAPI === null) {
+    useBulkAPI = constants.useBulkAPI;
+  }
   grunt.config('username', grunt.option('username') || constants.username);
   grunt.config('password', grunt.option('password') || constants.password);
   grunt.config('sfUrl', grunt.option('sfUrl') || constants.sfUrl);
-  grunt.config('useBulkAPI', grunt.option('useBulkAPI') || constants.useBulkAPI);
+  grunt.config('useBulkAPI', useBulkAPI);
   grunt.config('instanceUrl', grunt.option('instanceUrl'));
   grunt.config('jwt', grunt.option('jwt'));
   grunt.config('namespaces', grunt.option('namespaces') || constants.namespaces);

@@ -82,7 +82,7 @@ module.exports = function(config) {
   container.register('query-object-factory', ['query-service', 'bulk-query-service', 'promise'], queryObjectFactory);
   container.register('apex-service', ['connection', 'promise', 'util', 'logger'], apexService);
   container.register('environment-service', ['query-object-factory', 'promise'], environmentService);
-  container.register('record-service', ['connection', 'promise', 'logger'], recordService);
+  container.register('record-service', ['connection', 'promise', 'logger', 'jsforce-partner-service', 'lodash'], recordService);
   container.register('bulk-record-service', ['connection', 'promise', 'logger'], bulkRecordService);
   container.register('community-user-service',
       ['query-service', 'record-service', 'promise', 'logger'],
