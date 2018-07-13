@@ -31,11 +31,11 @@ module.exports = function(grunt) {
     }
 
     if (grunt.option('znu')) {
-      grunt.config('namespaces', {'NU__': 'znu__', 'NC__': '', 'NU.': 'znu.'});
+      grunt.config('namespaces', {'NU__': 'znu__', 'NC__': '', 'NU.': 'znu.', 'NC.': ''});
     } else if (grunt.option('dev')) {
-      grunt.config('namespaces', {'NU__': '', 'NC__': '', 'NU.': ''});
+      grunt.config('namespaces', {'NU__': '', 'NC__': '', 'NU.': '', 'NC.': ''});
     } else if (grunt.option('packaged')) {
-      grunt.config('namespaces', {'NU__': 'NU__', 'NC__': 'NC__', 'NU.': 'NU.'});
+      grunt.config('namespaces', {'NU__': 'NU__', 'NC__': 'NC__', 'NU.': 'NU.', 'NC.': 'NC.'});
     }
 
     return containerFactory({
