@@ -30,6 +30,8 @@ module.exports = function(QueryObject, query, promise) {
         delete record[mapping.sourceColumn];
       } else if (mapping.value) {
         record[mapping.destColumn] = mapping.value;
+      } else if (mapping.deleteColumn) {
+        delete record[mapping.deleteColumn];
       }
     };
   };

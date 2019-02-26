@@ -63,7 +63,11 @@ describe('connection-service', function() {
     beforeEach(function() {
       var configMock = {
         instanceUrl: 'data',
-        jwt: 'asdfasdf'
+        clientId: 'asdfasdf',
+        privateKey: 'somethingprivate'
+      };
+      var sfjwtmock = {
+        getToken: sinon.stub()
       };
       connectionMock = sinon.stub();
       jsforceMock = {
@@ -73,7 +77,8 @@ describe('connection-service', function() {
           };
         }
       };
-      connection = connectionServiceFactory(jsforceMock, promise, configMock);
+      sfjwtmock.getToken.callsArgWith(3, null, 'AccessToken');
+      connection = connectionServiceFactory(jsforceMock, promise, configMock, sfjwtmock);
     });
 
     it('Expect connectionMock called for initialize', function(done) {
