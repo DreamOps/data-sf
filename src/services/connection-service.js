@@ -41,6 +41,7 @@ module.exports = function(jsforce, config) {
     if (_loggedInConnection === undefined) {
       return connect().then(conn => {
         _loggedInConnection = conn;
+        return conn;
       });
     } else {
       return Promise.resolve(_loggedInConnection);
