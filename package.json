@@ -7,7 +7,6 @@
     "email": "jjuby@nimbleuser.com"
   },
   "license": "UNLICENSED",
-  "private": true,
   "main": "index.js",
   "repository": {
     "type": "git",
