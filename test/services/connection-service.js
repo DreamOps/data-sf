@@ -1,5 +1,4 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
 var expect = require('chai').expect;
 var connectionServiceFactory = require('./../../src/services/connection-service');
 
@@ -22,7 +21,7 @@ describe('connection-service', function() {
           };
         }
       };
-      connection = connectionServiceFactory(jsforceMock, promise, configMock);
+      connection = connectionServiceFactory(jsforceMock, configMock);
     });
 
     it('Expect connectionMock called for login', function(done) {
@@ -56,7 +55,7 @@ describe('connection-service', function() {
     });
   });
 
-  describe('logs in with username and password', function() {
+  describe('logs in with client id and private key', function() {
     var connection;
     var jsforceMock;
     var connectionMock;
@@ -64,7 +63,7 @@ describe('connection-service', function() {
       var configMock = {
         instanceUrl: 'data',
         clientId: 'asdfasdf',
-        privateKey: 'somethingprivate'
+        jwt: 'somethingprivate'
       };
       var sfjwtmock = {
         getToken: sinon.stub()
@@ -73,12 +72,13 @@ describe('connection-service', function() {
       jsforceMock = {
         Connection: function(opts) {
           return {
-            initialize: connectionMock
+            initialize: connectionMock,
+            login: connectionMock
           };
         }
       };
       sfjwtmock.getToken.callsArgWith(3, null, 'AccessToken');
-      connection = connectionServiceFactory(jsforceMock, promise, configMock, sfjwtmock);
+      connection = connectionServiceFactory(jsforceMock, configMock);
     });
 
     it('Expect connectionMock called for initialize', function(done) {

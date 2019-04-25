@@ -1,12 +1,13 @@
+const promiseHelper = require('../utilities/promise');
+
 /**
  * Factory function for the record-service.
  *
  * @param {function} login - Service for connecting to SF orgs.
- * @param {object} promise - Library dependency injection.
  * @param {function} logger - Function that logs a passed in string.
  * @return {object} record-service provides functions for managing SObject records.
  */
-module.exports = function(login, promise, logger, jsforcePartnerService, _) {
+module.exports = function(login, logger, jsforcePartnerService, _) {
   /**
    * Insert a json record.
    *
@@ -15,19 +16,23 @@ module.exports = function(login, promise, logger, jsforcePartnerService, _) {
    * @return {object} Promise that resolves with the result of the upsert.
    */
   var insertRecord = function(type, record) {
-    var deferred = new promise.Deferred();
-    login().then(function(connection) {
-      connection.sobject(type).insert(record, function(err, res2) {
-        if (err) {
-          logger('Insert Failure: ' + type + ' ' + err);
-          deferred.resolve(err);
-        } else {
-          logger('Insert success: ' + type);
-          deferred.resolve(res2);
-        }
-      });
+    return new Promise((resolve, reject) => {
+      login()
+        .then(connection => {
+          connection.sobject(type).insert(record, (err, res2) => {
+            if (err) {
+              logger('Insert Failure: ' + type + ' ' + err);
+              return resolve(err);
+            }
+
+            logger('Insert success: ' + type);
+            resolve(res2);
+          });
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
-    return deferred.promise;
   };
 
   /**
@@ -38,18 +43,21 @@ module.exports = function(login, promise, logger, jsforcePartnerService, _) {
    * @return {object} Promise that resolves when all records have been inserted.
    */
   var insertRecords = function(type, records) {
-    var deferred = new promise.Deferred();
-    var fnArray = records.map(function(record, index) {
-      return function() {
-        return insertRecord(type, record);
-      };
+    return new Promise((resolve, reject) => {
+      var promises = records.map(record => {
+        return function() {
+          return insertRecord(type, record);
+        };
+      });
+
+      promiseHelper.seq(promises)
+        .then(results => {
+          resolve(results);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
-    promise.seq(fnArray).then(function(results) {
-      deferred.resolve(results);
-    }, function(err) {
-      deferred.reject(err);
-    });
-    return deferred.promise;
   };
 
   /**
@@ -61,19 +69,19 @@ module.exports = function(login, promise, logger, jsforcePartnerService, _) {
    * @return {object} Promise that resolves with the result of the upsert.
    */
   var upsertRecord = function(type, record, extId) {
-    var deferred = new promise.Deferred();
-    login().then(function(connection) {
-      connection.sobject(type).upsert(record, extId, function(err, res2) {
-        if (err) {
-          logger('Upsert Failure: ' + type + ' ' + err + '\n\tId: ' + record[extId]);
-          deferred.resolve(err);
-        } else {
-          logger('Upsert success: ' + type);
-          deferred.resolve(res2);
-        }
-      });
+    return new Promise((resolve, reject) => {
+      login()
+        .then(connection => {
+          connection.sobject(type).upsert(record, extId, (err, res2) => {
+            if (err) {
+              logger('Upsert Failure: ' + type + ' ' + err + '\n\tId: ' + record[extId]);
+              return resolve(err);
+            }
+            logger('Upsert success: ' + type);
+            resolve(res2);
+          });
+        });
     });
-    return deferred.promise;
   };
 
   /**
@@ -122,23 +130,26 @@ module.exports = function(login, promise, logger, jsforcePartnerService, _) {
 
       var chunks = _.chunk(records, 200);
       var index = 0;
-      var fnArray = chunks.map(function(chunk) {
+      var promises = chunks.map(chunk => {
         return function() {
-          return jsforcePartnerService.upsert(extId, chunk).then(function(results) {
-            results.forEach(function(result) {
-              if (result.success) {
-                logger(type + ' ' + (++index) + ' loaded successfully, id = ' + result.id);
-              } else {
-                logger(type + ' ' + (++index) + ' error occurred, message = ' +
-                    result.errors.map(e => e.message).join(', '));
-              }
+          return jsforcePartnerService.upsert(extId, chunk)
+            .then(results => {
+              results.forEach(result => {
+                if (result.success) {
+                  logger(type + ' ' + (++index) + ' loaded successfully, id = ' + result.id);
+                } else {
+                  logger(type + ' ' + (++index) + ' error occurred, message = ' +
+                      result.errors.map(e => e.message).join(', '));
+                }
+              });
+            })
+            .catch(err => {
+              logger(err);
             });
-          }, function(err) {
-            logger(err);
-          });
         };
       });
-      return promise.seq(fnArray);
+
+      return promiseHelper.seq(promises);
     });
   };
   /**
@@ -149,15 +160,11 @@ module.exports = function(login, promise, logger, jsforcePartnerService, _) {
    * @return {object} Promise that resolves with the result of the delete.
    */
   var deleteRecord = function(type, id) {
-    var deferred = new promise.Deferred();
-    login().then(function(connection) {
-      connection.del(type, id, function(err, rets) {
-        if (err) { return deferred.reject(err); }
+    return login().then(connection => {
+      return connection.del(type, id).then(rets => {
         logger(type + ' response: ' + JSON.stringify(rets));
-        deferred.resolve(rets);
       });
     });
-    return deferred.promise;
   };
 
   return {

@@ -1,6 +1,4 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var bulkRecordServiceFactory = require('./../../src/services/bulk-record-service');
 var testLogger = function(s) {};
@@ -26,7 +24,7 @@ describe('bulk-record-service', function() {
         }
       ];
       var loginMock = sinon.stub();
-      bulkRecordService = bulkRecordServiceFactory(loginMock, promise, testLogger);
+      bulkRecordService = bulkRecordServiceFactory(loginMock, testLogger);
     });
 
     it('maps fields that end with __r', function() {
@@ -93,7 +91,7 @@ describe('bulk-record-service', function() {
         }
       };
       loginMock = sinon.stub().resolves(connectionMock);
-      bulkRecordService = bulkRecordServiceFactory(loginMock, promise, testLogger);
+      bulkRecordService = bulkRecordServiceFactory(loginMock, testLogger);
     });
 
     it('Expect loginMock called', function(done) {
@@ -204,7 +202,7 @@ describe('bulk-record-service', function() {
         }
       };
       loginMock = sinon.stub().resolves(connectionMock);
-      bulkRecordService = bulkRecordServiceFactory(loginMock, promise, testLogger);
+      bulkRecordService = bulkRecordServiceFactory(loginMock, testLogger);
     });
 
     it('Expect loginMock called', function(done) {

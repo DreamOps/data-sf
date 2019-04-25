@@ -1,7 +1,5 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
 var lodash = require('lodash');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var recordServiceFactory = require('./../../src/services/record-service');
 var testLogger = function(s) {};
@@ -17,11 +15,11 @@ describe('record-service', function() {
         del: deleteMock
       };
       loginMock = sinon.stub().resolves(connectionMock);
-      recordService = recordServiceFactory(loginMock, promise, testLogger);
+      recordService = recordServiceFactory(loginMock, testLogger);
     });
 
     it('Expect loginMock called', function(done) {
-      deleteMock.callsArgWith(2, null, 'delete success');
+      deleteMock.resolves('delete success');
       recordService.deleteRecord('Account', '1').then(function() {
         expect(loginMock.called).to.be.true;
         done();
@@ -29,7 +27,7 @@ describe('record-service', function() {
     });
 
     it('Expect deleteMock called', function(done) {
-      deleteMock.callsArgWith(2, null, 'delete success');
+      deleteMock.resolves('delete success');
       recordService.deleteRecord('Account', '1').then(function() {
         expect(loginMock.called).to.be.true;
         expect(deleteMock.calledWith('Account', '1')).to.be.true;
@@ -38,13 +36,13 @@ describe('record-service', function() {
     });
 
     it('Expect promise rejection when deleteMock rejects', function(done) {
-      deleteMock.callsArgWith(2, 'error occured', null);
+      deleteMock.rejects('error occured');
       recordService.deleteRecord('Account', '1').then(function() {
         expect(true).to.be.false;
         done();
       }, function(reason) {
         expect(deleteMock.calledWith('Account', '1')).to.be.true;
-        expect(reason).to.be.equal('error occured');
+        expect(reason.name).to.be.equal('error occured');
         done();
       });
     });
@@ -67,7 +65,7 @@ describe('record-service', function() {
         sobject: sobjectMock
       };
       loginMock = sinon.stub().resolves(connectionMock);
-      recordService = recordServiceFactory(loginMock, promise, testLogger);
+      recordService = recordServiceFactory(loginMock, testLogger);
     });
 
     it('Expect loginMock called', function(done) {
@@ -76,9 +74,9 @@ describe('record-service', function() {
       .then(function() {
         expect(loginMock.called).to.be.true;
         done();
-      },function(err) {
-      console.log(err);
-      done();
+      }, function(err) {
+        console.log(err);
+        done();
       });
     });
 
@@ -105,12 +103,12 @@ describe('record-service', function() {
     it('Expect promise resolves when upsertMock rejects', function(done) {
       insertMock.callsArgWith(1, 'error occured', null);
       recordService.insertRecord('Account', {Id: 1})
-      .then(function(reason) {
-        expect(reason).to.be.equal('error occured');
-        expect(sobjectMock.calledWith('Account')).to.be.true;
-        expect(insertMock.calledWith({Id: 1})).to.be.true;
-        done();
-      });
+        .then((reason) => {
+          expect(reason).to.be.equal('error occured');
+          expect(sobjectMock.calledWith('Account')).to.be.true;
+          expect(insertMock.calledWith({Id: 1})).to.be.true;
+          done();
+        });
     });
   });
 
@@ -133,7 +131,7 @@ describe('record-service', function() {
         sobject: sobjectMock
       };
       loginMock = sinon.stub().resolves(connectionMock);
-      recordService = recordServiceFactory(loginMock, promise, testLogger);
+      recordService = recordServiceFactory(loginMock, testLogger);
     });
 
     it('Expect loginMock called', function(done) {
@@ -173,17 +171,17 @@ describe('record-service', function() {
     it('Expect promise rejection when insertMock rejects', function(done) {
       insertMock.callsArgWith(1, 'error occured', null);
       recordService.insertRecords('Account', records)
-      .then(function(reason) {
-        expect(reason).to.be.equal('error occured');
-        expect(sobjectMock.calledTwice).to.be.true;
-        expect(sobjectMock.calledWith('Account')).to.be.true;
-        expect(insertMock.calledTwice).to.be.true;
-        var firstCall = insertMock.getCall(0);
-        var secondCall = insertMock.getCall(1);
-        expect(firstCall.calledWith(records[0])).to.be.true;
-        expect(secondCall.calledWith(records[1])).to.be.true;
-        done();
-      });
+        .then(function(reason) {
+          expect(reason).to.be.equal('error occured');
+          expect(sobjectMock.calledTwice).to.be.true;
+          expect(sobjectMock.calledWith('Account')).to.be.true;
+          expect(insertMock.calledTwice).to.be.true;
+          var firstCall = insertMock.getCall(0);
+          var secondCall = insertMock.getCall(1);
+          expect(firstCall.calledWith(records[0])).to.be.true;
+          expect(secondCall.calledWith(records[1])).to.be.true;
+          done();
+        });
     });
   });
 
@@ -204,7 +202,7 @@ describe('record-service', function() {
         sobject: sobjectMock
       };
       loginMock = sinon.stub().resolves(connectionMock);
-      recordService = recordServiceFactory(loginMock, promise, testLogger);
+      recordService = recordServiceFactory(loginMock, testLogger);
     });
 
     it('Expect loginMock called', function(done) {
@@ -213,9 +211,9 @@ describe('record-service', function() {
       .then(function() {
         expect(loginMock.called).to.be.true;
         done();
-      },function(err) {
-      console.log(err);
-      done();
+      }, function(err) {
+        console.log(err);
+        done();
       });
     });
 
@@ -242,12 +240,12 @@ describe('record-service', function() {
     it('Expect promise resolves when upsertMock rejects', function(done) {
       upsertMock.callsArgWith(2, 'error occured', null);
       recordService.upsertRecord('Account', {Id: 1}, 'externalId')
-      .then(function(reason) {
-        expect(reason).to.be.equal('error occured');
-        expect(sobjectMock.calledWith('Account')).to.be.true;
-        expect(upsertMock.calledWith({Id: 1}, 'externalId')).to.be.true;
-        done();
-      });
+        .then((reason) => {
+          expect(reason).to.be.equal('error occured');
+          expect(sobjectMock.calledWith('Account')).to.be.true;
+          expect(upsertMock.calledWith({Id: 1}, 'externalId')).to.be.true;
+          done();
+        });
     });
   });
 
@@ -274,7 +272,7 @@ describe('record-service', function() {
         describeSObjects: describeMock,
         upsert: upsertMock,
       };
-      recordService = recordServiceFactory(loginMock, promise, testLogger, partnerServiceMock, lodash);
+      recordService = recordServiceFactory(loginMock, testLogger, partnerServiceMock, lodash);
     });
 
     it('Expect describeMock called', function(done) {

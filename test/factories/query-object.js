@@ -1,6 +1,4 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var queryObjectFactoryFunction = require('./../../src/factories/query-object');
 
@@ -77,8 +75,7 @@ describe('query-object-factory', function() {
       bulkQueryMock = sinon.stub().resolves(records);
       queryObjectFactory = queryObjectFactoryFunction(
         queryMock,
-        bulkQueryMock,
-        promise
+        bulkQueryMock
       );
       qObjects = queryObjectFactory(queryObjectdata);
     });
@@ -109,7 +106,8 @@ describe('query-object-factory', function() {
       });
 
       it('rejects when query rejects', function(done) {
-        queryMock.reset().rejects('error');
+        queryMock.reset();
+        queryMock.rejects('error');
         qObjects[1].doQuery().then(function() {
           expect(false).to.be.true;
           done();
@@ -117,27 +115,29 @@ describe('query-object-factory', function() {
           expect(queryMock.called).to.be.true;
           expect(bulkQueryMock.called).to.be.false;
           expect(err).to.be.instanceof(Error);
-          expect(err.message).to.be.eq('error');
+          expect(err.toString()).to.be.eq('error');
           done();
         });
       });
 
       it('rejects when bulkQuery rejects', function(done) {
-        bulkQueryMock.reset().rejects('error');
+        bulkQueryMock.reset();
+        bulkQueryMock.rejects('error');
         qObjects[0].doQuery().then(function() {
           expect(false).to.be.true;
           done();
         }, function(err) {
           expect(bulkQueryMock.calledOnce).to.be.true;
           expect(err).to.be.instanceof(Error);
-          expect(err.message).to.be.eq('error');
+          expect(err.toString()).to.be.eq('error');
           done();
         });
       });
 
       describe('mapping fields', function() {
         beforeEach(function() {
-          queryMock.reset().resolves(recordTypeRecords);
+          queryMock.reset();
+          queryMock.resolves(recordTypeRecords);
         });
 
         it('deletes the attributes property', function(done) {
@@ -190,7 +190,8 @@ describe('query-object-factory', function() {
       describe('mapping record types', function() {
         beforeEach(function() {
           records[0].RecordTypeId = '1';
-          queryMock.reset().resolves(recordTypeRecords);
+          queryMock.reset();
+          queryMock.resolves(recordTypeRecords);
         });
 
         it('Maps RecordTypeId to an expression', function(done) {
@@ -217,8 +218,7 @@ describe('query-object-factory', function() {
         queryMock = sinon.stub().resolves(records);
         queryObjectFactory = queryObjectFactoryFunction(
           queryMock,
-          bulkQueryMock,
-          promise
+          bulkQueryMock
         );
         qObjects = queryObjectFactory(queryObjectdata);
       });

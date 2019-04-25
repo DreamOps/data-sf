@@ -1,7 +1,4 @@
 var sinon = require('sinon');
-var util = require('util');
-var promise = require('promised-io/promise');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var partnerServiceFactory = require('./../../src/services/jsforce-partner-service');
 

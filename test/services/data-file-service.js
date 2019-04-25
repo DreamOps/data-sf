@@ -1,6 +1,4 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var dataFileServiceFactory = require('./../../src/services/data-file-service');
 
@@ -80,8 +78,7 @@ describe('data-file-service', function() {
       dataFileService = dataFileServiceFactory(
         environmentMock,
         recordServiceMock,
-        null,
-        promise
+        null
       );
     });
 
@@ -121,12 +118,13 @@ describe('data-file-service', function() {
     });
 
     it('Expect promise rejection when buildEnvironment rejects', function(done) {
-      environmentMock.buildEnvironment.reset().rejects('this is an error');
+      environmentMock.buildEnvironment.reset();
+      environmentMock.buildEnvironment.rejects('this is an error');
       dataFileService.processData(dataFileJson).then(function() {
         expect(false).to.be.true;
         done();
       }, function(reason) {
-        expect(reason.message).to.be.equal('this is an error');
+        expect(reason.toString()).to.be.equal('this is an error');
         expect(environmentMock.buildEnvironment.called).to.be.true;
         expect(environmentMock.replaceVariables.called).to.be.false;
         expect(recordServiceMock.insertRecords.called).to.be.false;
@@ -135,12 +133,13 @@ describe('data-file-service', function() {
     });
 
     it('Expect promise rejection when upsertRecords rejects', function(done) {
-      recordServiceMock.upsertRecords.reset().rejects('this is an error');
+      recordServiceMock.upsertRecords.reset();
+      recordServiceMock.upsertRecords.rejects('this is an error');
       dataFileService.processData(dataFileJson).then(function() {
         expect(false).to.be.true;
         done();
       }, function(reason) {
-        expect(reason.message).to.be.equal('this is an error');
+        expect(reason.toString()).to.be.equal('this is an error');
         expect(environmentMock.buildEnvironment.called).to.be.true;
         expect(environmentMock.replaceVariables.called).to.be.true;
         expect(recordServiceMock.upsertRecords.called).to.be.true;
@@ -165,8 +164,7 @@ describe('data-file-service', function() {
       dataFileService = dataFileServiceFactory(
         environmentMock,
         recordServiceMock,
-        null,
-        promise
+        null
       );
     });
 
@@ -206,12 +204,13 @@ describe('data-file-service', function() {
     });
 
     it('Expect promise rejection when buildEnvironment rejects', function(done) {
-      environmentMock.buildEnvironment.reset().rejects('this is an error');
+      environmentMock.buildEnvironment.reset();
+      environmentMock.buildEnvironment.rejects('this is an error');
       dataFileService.processDataInsert(dataFileJson).then(function() {
         expect(false).to.be.true;
         done();
       }, function(reason) {
-        expect(reason.message).to.be.equal('this is an error');
+        expect(reason.toString()).to.be.equal('this is an error');
         expect(environmentMock.buildEnvironment.called).to.be.true;
         expect(environmentMock.replaceVariables.called).to.be.false;
         expect(recordServiceMock.insertRecords.called).to.be.false;
@@ -220,12 +219,13 @@ describe('data-file-service', function() {
     });
 
     it('Expect promise rejection when insertRecords rejects', function(done) {
-      recordServiceMock.insertRecords.reset().rejects('this is an error');
+      recordServiceMock.insertRecords.reset();
+      recordServiceMock.insertRecords.rejects('this is an error');
       dataFileService.processDataInsert(dataFileJson).then(function() {
         expect(false).to.be.true;
         done();
       }, function(reason) {
-        expect(reason.message).to.be.equal('this is an error');
+        expect(reason.toString()).to.be.equal('this is an error');
         expect(environmentMock.buildEnvironment.called).to.be.true;
         expect(environmentMock.replaceVariables.called).to.be.true;
         expect(recordServiceMock.insertRecords.called).to.be.true;
@@ -242,8 +242,7 @@ describe('data-file-service', function() {
       dataFileService = dataFileServiceFactory(
         null,
         null,
-        executeMock,
-        promise
+        executeMock
       );
     });
 
@@ -255,12 +254,13 @@ describe('data-file-service', function() {
     });
 
     it('Expect promise rejection when executeMock rejects', function(done) {
-      executeMock.reset().rejects('error');
+      executeMock.reset();
+      executeMock.rejects('error');
       dataFileService.cleanData(dataFileJson.cleaners).then(function() {
         expect(false).to.be.true;
         done();
       }, function(reason) {
-        expect(reason.message).to.be.equal('error');
+        expect(reason.toString()).to.be.equal('error');
         expect(executeMock.called).to.be.true;
         done();
       });
@@ -285,7 +285,6 @@ describe('data-file-service', function() {
         writeFile: sinon.stub()
       };
       dataFileService = dataFileServiceFactory(
-        null,
         null,
         null,
         null,
@@ -370,7 +369,6 @@ describe('data-file-service', function() {
         writeFile: sinon.stub()
       };
       dataFileService = dataFileServiceFactory(
-        null,
         null,
         null,
         null,

@@ -2,10 +2,9 @@
   * Factory function for the query-service.
   *
   * @param {function} login - Service for connecting to SF orgs.
-  * @param {object} promise - promise dependecy injected.
   * @return {function} query-service executes a SOQL query.
   */
-module.exports = function(login, promise) {
+module.exports = function(login) {
  /**
   * Runs a query against Salesforce Org.
   *
@@ -13,13 +12,17 @@ module.exports = function(login, promise) {
   * @return {object} Promise that resolves with the results of the query.
   */
   return function(queryString) {
-    var deferred = new promise.Deferred();
-    login().then(function(connection) {
-      connection.query(queryString, function(err, result) {
-        if (err) { deferred.reject(err); }
-        return deferred.resolve(result.records);
-      });
+    return new Promise((resolve, reject) => {
+      login()
+        .then(connection => {
+          connection.query(queryString, (err, result) => {
+            if (err) { return reject(err); };
+            resolve(result.records);
+          });
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
-    return deferred.promise;
   };
 };

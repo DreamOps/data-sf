@@ -1,3 +1,4 @@
+const promiseHelper = require('../src/utilities/promise');
 var containerFactory = require('../src/container-config');
 var readlineSync = require('readline-sync');
 var fs = require('fs');
@@ -58,7 +59,6 @@ module.exports = function(grunt) {
     var done = runner.async();
 
     var container = getContainer();
-    var seq = container.get('promise').seq;
     var dataFileService = container.get('data-file-service');
     var namespaceJSON = container.get('namespace-service');
 
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
       path.pop();
       path = path.join('/');
 
-      var fnArray = data.order.map(function(filename) {
+      var promises = data.order.map(function(filename) {
         var pathToFile = path + '/' + filename;
         if (filename.toLowerCase().endsWith('.json')) {
           var thisData = namespaceJSON(grunt.file.readJSON(pathToFile));
@@ -90,9 +90,14 @@ module.exports = function(grunt) {
           };
         }
       });
-      seq(fnArray).then(function(results) {
-        done();
-      }, handleError);
+
+      promiseHelper.seq(promises)
+        .then(() => {
+          done();
+        })
+        .catch(err => {
+          handleError(err);
+        });
     } else if (insert) {
       data = namespaceJSON(data);
       dataFileService.processDataInsert(data).then(function(results) {
@@ -109,21 +114,21 @@ module.exports = function(grunt) {
     if (arguments.length === 0) {
       handleError(this.name + ' Usage: upsert:path/to/data/file.json');
     }
-    sendData(path,false,this);
+    sendData(path, false, this);
   });
 
   grunt.registerTask('insert', 'Pass the data file to be synced to the SF org.', function(path) {
     if (arguments.length === 0) {
       handleError(this.name + ' Usage: insert:path/to/data/file.json');
     }
-    sendData(path,true,this);
+    sendData(path, true, this);
   });
 
   grunt.registerTask('data', 'Pass the data file to be synced to the SF org.', function(path) {
     if (arguments.length === 0) {
       handleError(this.name + ' Usage: data:path/to/data/file.json');
     }
-    sendData(path,false,this);
+    sendData(path, false, this);
   });
 
   grunt.registerTask('export', 'Pass the queries file of data to export.', function(path, dest) {
@@ -160,7 +165,6 @@ module.exports = function(grunt) {
     var done = this.async();
 
     var container = getContainer();
-    var seq = container.get('promise').seq;
     var dataFileService = container.get('data-file-service');
     var namespaceJSON = container.get('namespace-service');
 
@@ -173,7 +177,7 @@ module.exports = function(grunt) {
       path = path.join('/');
 
       var reverseFilenames = data.order.reverse();
-      var fnArray = reverseFilenames.map(function(filename) {
+      var promises = reverseFilenames.map(function(filename) {
         var pathToFile = path + '/' + filename;
         var thisData = namespaceJSON(grunt.file.readJSON(pathToFile));
         return function() {
@@ -181,9 +185,14 @@ module.exports = function(grunt) {
           return dataFileService.cleanData(thisData.cleaners);
         };
       });
-      seq(fnArray).then(function(results) {
-        done();
-      }, handleError);
+
+      promiseHelper.seq(promises)
+        .then(() => {
+          done();
+        })
+        .catch(err => {
+          handleError(err);
+        });
     } else {
       data = namespaceJSON(data);
       dataFileService.cleanData(data.cleaners).then(function() {
@@ -211,7 +220,6 @@ module.exports = function(grunt) {
     }
 
     var container = getContainer();
-    var seq = container.get('promise').seq;
     var dataFileService = container.get('data-file-service');
 
     var data = grunt.file.recurse(path, function(abspath, rootdir, subdir, filename) {

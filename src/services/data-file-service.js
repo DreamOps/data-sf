@@ -1,14 +1,15 @@
+const promiseHelper = require('../utilities/promise');
+
 /**
  * Factory function for the data-file-service.
  *
  * @param {object} environment - environment-service dependency provided.
  * @param {object} recordService - record-service dependency provided.
  * @param {function} executeApex - apex-service dependecy provided.
- * @param {object} promise - promise dependency provided.
  * @param {object} fs - file system dependency provided.
  * @return {object} data-file-service provides functions for managing json data files.
  */
-module.exports = function(environment, recordService, executeApex, promise, fs) {
+module.exports = function(environment, recordService, executeApex, fs) {
   /**
    * Processes the queries and records properties of a json data file.
    * Builds the environment based on the queries and replaces the data
@@ -18,8 +19,7 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
    * @return {object} Promise that resolves when all the record insertions finish.
    */
   var processDataInsert = function(data) {
-    var deferred = new promise.Deferred();
-    environment.buildEnvironment(data.queries).then(function(variables) {
+    return environment.buildEnvironment(data.queries).then(function(variables) {
       var fnArray = Object.keys(data.records).map(function(type) {
         var jsonRecords = data.records[type];
         var recordsToInsert = environment.replaceVariables(jsonRecords, variables);
@@ -28,13 +28,8 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
         };
       });
 
-      return promise.seq(fnArray);
-    }).then(function(results) {
-      deferred.resolve();
-    }, function(err) {
-      deferred.reject(err);
+      return promiseHelper.seq(fnArray);
     });
-    return deferred.promise;
   };
 
   /**
@@ -46,8 +41,7 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
    * @return {object} Promise that resolves when all the record insertions finish.
    */
   var processData = function(data) {
-    var deferred = new promise.Deferred();
-    environment.buildEnvironment(data.queries).then(function(variables) {
+    return environment.buildEnvironment(data.queries).then(function(variables) {
       var fnArray = Object.keys(data.records).map(function(type) {
         var jsonRecords = data.records[type];
         var recordsToInsert = environment.replaceVariables(jsonRecords, variables);
@@ -56,13 +50,8 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
         };
       });
 
-      return promise.seq(fnArray);
-    }).then(function(results) {
-      deferred.resolve();
-    }, function(err) {
-      deferred.reject(err);
+      return promiseHelper.seq(fnArray);
     });
-    return deferred.promise;
   };
 
   var obfuscateEmails = function(rawData) {
@@ -78,7 +67,6 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
    * @return {object} Promise that resolves when each of the records finishes executing.
    */
   var cleanData = function(records) {
-    var deferred = new promise.Deferred();
     var promises = records.map(function(record) {
       if (record.type === 'ApexScript') {
         return function() {
@@ -86,10 +74,7 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
         };
       }
     });
-    promise.seq(promises).then(function(results) {
-      deferred.resolve();
-    }, function(err) { deferred.reject(err); });
-    return deferred.promise;
+    return promiseHelper.seq(promises);
   };
 
   var templateJson = {
@@ -119,7 +104,12 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
     fileJson.records[type] = records;
     fileJson.extId = extId || 'NU__ExternalID__c';
     fileJson.queries = queries || [];
-    return fs.writeFile(destination, JSON.stringify(fileJson, null, 2));
+    return new Promise((resolve, reject) => {
+      fs.writeFile(destination, JSON.stringify(fileJson, null, 2), err => {
+        if (err) { return reject(err); };
+        resolve();
+      });
+    });
   };
 
   /**
@@ -132,7 +122,12 @@ module.exports = function(environment, recordService, executeApex, promise, fs) 
   var writeManifestFile = function(destination, fileNames) {
     var fileJson = JSON.parse(JSON.stringify(templateManifest));
     fileJson.order = fileNames;
-    return fs.writeFile(destination, JSON.stringify(fileJson, null, 2));
+    return new Promise((resolve, reject) => {
+      fs.writeFile(destination, JSON.stringify(fileJson, null, 2), err => {
+        if (err) { return reject(err); };
+        resolve();
+      });
+    });
   };
 
   return {

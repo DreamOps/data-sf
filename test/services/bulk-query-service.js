@@ -1,6 +1,4 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var queryServiceFactory = require('./../../src/services/bulk-query-service');
 
@@ -9,7 +7,6 @@ describe('bulk-query-service', function() {
   var loginMock;
   var connectionMock;
   var createJobMock;
-  var records;
   var jobMock;
   var batchMock;
   var dataStreamMock;
@@ -37,7 +34,7 @@ describe('bulk-query-service', function() {
       }
     };
     loginMock = sinon.stub().resolves(connectionMock);
-    query = queryServiceFactory(loginMock, promise);
+    query = queryServiceFactory(loginMock);
   });
 
   it('Expect loginMock called', function(done) {

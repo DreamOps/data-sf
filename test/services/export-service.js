@@ -1,6 +1,4 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var exportServiceFactory = require('./../../src/services/export-service');
 
@@ -39,8 +37,7 @@ describe('export-service', function() {
       loginMock = sinon.stub().resolves();
       exportService = exportServiceFactory(
         loginMock,
-        mockDataFileService,
-        promise
+        mockDataFileService
       );
     });
 
@@ -105,13 +102,14 @@ describe('export-service', function() {
     });
 
     it('expects promise rejects for doQuery reject', function(done) {
-      queryObjectMock1.doQuery.reset().rejects('error');
+      queryObjectMock1.doQuery.reset();
+      queryObjectMock1.doQuery.rejects('error');
       exportService.export(queryObjectMocks, destinationDir)
       .then(function() {
         expect(false).to.be.true;
         done();
       }, function(err) {
-        expect(err.message).to.be.eq('error');
+        expect(err.toString()).to.be.eq('error');
         done();
       });
     });
@@ -123,31 +121,33 @@ describe('export-service', function() {
         expect(false).to.be.true;
         done();
       }, function(err) {
-        expect(err.message).to.be.eq('error');
+        expect(err.toString()).to.be.eq('error');
         done();
       });
     });
 
     it('expects promise rejects for writeDataFile reject', function(done) {
-      mockDataFileService.writeDataFile.reset().rejects('error');
+      mockDataFileService.writeDataFile.reset();
+      mockDataFileService.writeDataFile.rejects('error');
       exportService.export(queryObjectMocks, destinationDir)
       .then(function() {
         expect(false).to.be.true;
         done();
       }, function(err) {
-        expect(err.message).to.be.eq('error');
+        expect(err.toString()).to.be.eq('error');
         done();
       });
     });
 
     it('expects promise rejects for writeManifestFile reject', function(done) {
-      mockDataFileService.writeManifestFile.reset().rejects('error');
+      mockDataFileService.writeManifestFile.reset();
+      mockDataFileService.writeManifestFile.rejects('error');
       exportService.export(queryObjectMocks, destinationDir)
       .then(function() {
         expect(false).to.be.true;
         done();
       }, function(err) {
-        expect(err.message).to.be.eq('error');
+        expect(err.toString()).to.be.eq('error');
         done();
       });
     });

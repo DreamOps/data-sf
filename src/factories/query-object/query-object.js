@@ -2,10 +2,9 @@
  * Factory function for QueryObjects constructor.
  *
  * @param {function} query - query-service dependency provided.
- * @param {object} promise - promise dependency provided.
  * @return {function} QueryObject - Constructs QueryObject instances.
  */
-module.exports = function(query, promise) {
+module.exports = function(query) {
   function QueryObject(queryObjectDatum) {
     this.datum = queryObjectDatum;
   };
@@ -16,15 +15,10 @@ module.exports = function(query, promise) {
    * @return {object} The queryRecords for the resulting json file.
    */
   QueryObject.prototype.doQuery = function() {
-    var deferred = new promise.Deferred();
     var self = this;
-    query(this.getQuery()).then(function(results) {
+    return query(self.getQuery()).then(results => {
       self.records = results;
-      deferred.resolve();
-    }, function(err) {
-      deferred.reject(err);
     });
-    return deferred.promise;
   };
 
   QueryObject.prototype.getFileName = function() {

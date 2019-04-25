@@ -1,8 +1,5 @@
 var sinon = require('sinon');
-var util = require('util');
-var promise = require('promised-io/promise');
 var lodash = require('lodash');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var mappingServiceFactory = require('./../../src/services/mapping-service');
 var describeMock = require('./describeResult.json');

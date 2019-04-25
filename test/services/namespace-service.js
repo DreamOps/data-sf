@@ -1,4 +1,3 @@
-var util = require('util');
 var expect = require('chai').expect;
 var namespaceServiceFactory = require('./../../src/services/namespace-service');
 

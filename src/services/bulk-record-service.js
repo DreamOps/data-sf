@@ -2,11 +2,10 @@
  * Factory function for the bulk-record-service.
  *
  * @param {function} login - Service for connecting to SF orgs.
- * @param {object} promise - Library dependency injection.
  * @param {function} logger - Function that logs a passed in string.
  * @return {object} record-service
  */
-module.exports = function(login, promise, logger) {
+module.exports = function(login, logger) {
 
   /**
    * Takes an array of records and maps __r fields from objects to
@@ -43,11 +42,9 @@ module.exports = function(login, promise, logger) {
    * @return {object} Promise that resolves when all records have been inserted.
    */
   var insertRecords = function(type, records, extId) {
-    var deferred = new promise.Deferred();
     if (records.length < 1) {
       logger('Empty records, nothing to do');
-      deferred.resolve();
-      return deferred.promise;
+      return Promise.resolve();
     }
 
     //empty relationship fields must be empty string
@@ -61,11 +58,10 @@ module.exports = function(login, promise, logger) {
     //map the relationship fields for the bulk API
     records = mapRelationshipFields(records);
 
-    login().then(function(conn) {
+    return login().then(function(conn) {
       var job = conn.bulk.createJob(type, 'insert');
-      executeJob(type, records, job, deferred);
+      return executeJob(type, records, job);
     });
-    return deferred.promise;
   };
 
     /**
@@ -77,11 +73,9 @@ module.exports = function(login, promise, logger) {
      * @return {object} Promise that resolves when all records have been inserted.
      */
     var upsertRecords = function(type, records, extId) {
-      var deferred = new promise.Deferred();
       if (records.length < 1) {
         logger('Empty records, nothing to do');
-        deferred.resolve();
-        return deferred.promise;
+        return Promise.resolve();
       }
       //set externalIds if it is not already set.
       extId = extId || 'NU__ExternalID__c';
@@ -101,11 +95,10 @@ module.exports = function(login, promise, logger) {
       //map the relationship fields for the bulk API
       records = mapRelationshipFields(records);
 
-      login().then(function(conn) {
+      return login().then(function(conn) {
         var job = conn.bulk.createJob(type, 'upsert', {extIdField: extId});
-        executeJob(type, records, job, deferred);
+        return executeJob(type, records, job);
       });
-      return deferred.promise;
     };
 
     /**
@@ -114,41 +107,42 @@ module.exports = function(login, promise, logger) {
     * @param {string} type - The SobjectType that we are inserting.
     * @param {array} records - The array of json records to be inserted.
     * @param {object} job - Job to be executed by Bulk API
-    * @param {object} deferred = Promise object to be resolved
     */
-    var executeJob = function(type, records, job, deferred) {
-      var batch = job.createBatch();
-      batch.on('queue', function(batchInfo) {
-        //poll the batch every second, timeout after 200s
-        batch.poll(1000, 500000);
-        logger('batch is queued, jobId: ' + batchInfo.jobId +
-               ' batchId: ' + batchInfo.batchId);
-      });
+    var executeJob = function(type, records, job) {
+      return new Promise((resolve, reject) => {
+        var batch = job.createBatch();
+        batch.on('queue', function(batchInfo) {
+          //poll the batch every second, timeout after 200s
+          batch.poll(1000, 500000);
+          logger('batch is queued, jobId: ' + batchInfo.jobId +
+                ' batchId: ' + batchInfo.batchId);
+        });
 
-      batch.execute(records, function(err, rets) {
-        if (err) { return deferred.reject(err); }
+        batch.execute(records, function(err, rets) {
+          if (err) { return reject(err); }
 
-        for (var i = 0; i < rets.length; i++) {
-          if (rets[i].success) {
-            logger(type + ' ' + (i + 1) + ' loaded successfully, id = ' + rets[i].id);
-          } else {
-            logger(type + ' ' + (i + 1) + ' error occurred, message = ' + rets[i].errors.join(', '));
+          for (var i = 0; i < rets.length; i++) {
+            if (rets[i].success) {
+              logger(type + ' ' + (i + 1) + ' loaded successfully, id = ' + rets[i].id);
+            } else {
+              logger(type + ' ' + (i + 1) + ' error occurred, message = ' + rets[i].errors.join(', '));
+            }
           }
-        }
-        job.close();
-      });
+          job.close();
+        });
 
-      job.on('close', function(jobInfo) {
-        logger('Job Completed for ' + jobInfo.object);
-        logger('Total Batches ' + jobInfo.numberBatchesTotal);
-        logger('Total Records ' + jobInfo.numberRecordsProcessed);
-        logger('Total Processing Time ' + jobInfo.totalProcessingTime);
-        return deferred.resolve(jobInfo);
-      });
+        job.on('close', function(jobInfo) {
+          logger('Job Completed for ' + jobInfo.object);
+          logger('Total Batches ' + jobInfo.numberBatchesTotal);
+          logger('Total Records ' + jobInfo.numberRecordsProcessed);
+          logger('Total Processing Time ' + jobInfo.totalProcessingTime);
+          return resolve(jobInfo);
+        });
 
-      job.on('error', function(error) {
-        logger('Job errord' + error);
-        return deferred.reject(error);
+        job.on('error', function(error) {
+          logger('Job errord' + error);
+          return reject(error);
+        });
       });
     };
 
