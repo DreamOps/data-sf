@@ -1,13 +1,12 @@
 {
-  "name": "nimbleforce",
+  "name": "@nimbleams/nimbleforce",
   "description": "grunt tasks and nimbleforce",
   "version": "0.1.0",
   "author": {
-    "name": "NimbleUser",
-    "email": "jjuby@nimbleuser.com"
+    "name": "Nimble AMS",
+    "email": "dev@nimbleams.com"
   },
   "license": "UNLICENSED",
-  "private": true,
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -24,7 +23,7 @@
     "readline-sync": "^1.4.5"
   },
   "keywords": [
-    "gruntplugin"
+    "nimbleams"
   ],
   "devDependencies": {
     "chai": "~4.2.0",
