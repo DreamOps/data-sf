@@ -1,4 +1,3 @@
-var util = require('util');
 var expect = require('chai').expect;
 var namespaceServiceFactory = require('./../../src/services/namespace-service');
 
@@ -6,23 +5,23 @@ describe('namespace-service', function() {
   var namespaceService;
   before(function() {
     namespaceService = namespaceServiceFactory({namespaces: {
-      'ZOOP__': 'FOO__',
-      'ZOOP.': 'FOO.',
-      'ZERP__': 'BAR__'
+      'NU__': 'FOO__',
+      'NU.': 'FOO.',
+      'NC__': 'BAR__'
     }});
   });
 
-  it('Expect all occurances of ZOOP__ namespace replaced', function() {
+  it('Expect all occurances of NU__ namespace replaced', function() {
     var testJson = {
-      'ZOOP__Product__c': {
+      'NU__Product__c': {
         'RecordTypeId': '${DonationRecordType.Id}',
         'Name': 'Test Donation Product',
-        'ZOOP__Entity__c': '${Entity.Id}',
-        'ZOOP__DisplayOrder__c': 1,
-        'ZOOP__QuantityMax__c': 1,
-        'ZOOP__ListPrice__c': 10.00,
-        'ZOOP__RevenueGLAccount__c': '${GlAccount.Id}',
-        'ZOOP__ExternalId__c': 'TestDonationProduct'
+        'NU__Entity__c': '${Entity.Id}',
+        'NU__DisplayOrder__c': 1,
+        'NU__QuantityMax__c': 1,
+        'NU__ListPrice__c': 10.00,
+        'NU__RevenueGLAccount__c': '${GlAccount.Id}',
+        'NU__ExternalId__c': 'TestDonationProduct'
       }
     };
     var testReturnJson = namespaceService(testJson);
@@ -38,18 +37,18 @@ describe('namespace-service', function() {
       .to.be.equal('Test Donation Product');
   });
 
-  it('Expect all occurances of ZOOP. namespace replaced', function() {
-    //fake JSON to test the ZOOP. removal
+  it('Expect all occurances of NU. namespace replaced', function() {
+    //fake JSON to test the NU. removal
     var testJson = {
-      'ZOOP__Product__c': {
+      'NU__Product__c': {
         'RecordTypeId': '${DonationRecordType.Id}',
         'Name': 'Test Donation Product',
-        'ZOOP__Entity__c': 'ZOOP.EntityManager.Id',
-        'ZOOP.DisplayOrder__c': 1,
-        'ZOOP.QuantityMax__c': 1,
-        'ZOOP.ListPrice__c': 10.00,
-        'ZOOP__RevenueGLAccount__c': '${GlAccount.Id}',
-        'ZOOP__ExternalId__c': 'TestDonationProduct'
+        'NU__Entity__c': 'NU.EntityManager.Id',
+        'NU.DisplayOrder__c': 1,
+        'NU.QuantityMax__c': 1,
+        'NU.ListPrice__c': 10.00,
+        'NU__RevenueGLAccount__c': '${GlAccount.Id}',
+        'NU__ExternalId__c': 'TestDonationProduct'
       }
     };
     var testReturnJson = namespaceService(testJson);
@@ -67,18 +66,18 @@ describe('namespace-service', function() {
       .to.be.equal('Test Donation Product');
   });
 
-  it('Expect all occurances of ZERP__ namespace replaced', function() {
-    //fake data for ZERP__ removal tests
+  it('Expect all occurances of NC__ namespace replaced', function() {
+    //fake data for NC__ removal tests
     var testJson = {
-      'ZERP__Product__c': {
+      'NC__Product__c': {
         'RecordTypeId': '${DonationRecordType.Id}',
         'Name': 'Test Donation Product',
-        'ZERP__Entity__c': '${Entity.Id}',
-        'ZERP__DisplayOrder__c': 1,
-        'ZERP__QuantityMax__c': 1,
-        'ZERP__ListPrice__c': 10.00,
-        'ZERP__RevenueGLAccount__c': '${GlAccount.Id}',
-        'ZERP__ExternalId__c': 'TestDonationProduct'
+        'NC__Entity__c': '${Entity.Id}',
+        'NC__DisplayOrder__c': 1,
+        'NC__QuantityMax__c': 1,
+        'NC__ListPrice__c': 10.00,
+        'NC__RevenueGLAccount__c': '${GlAccount.Id}',
+        'NC__ExternalId__c': 'TestDonationProduct'
       }
     };
     var testReturnJson = namespaceService(testJson);

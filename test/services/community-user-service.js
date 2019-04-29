@@ -1,6 +1,4 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var communityUserServiceFactory = require('./../../src/services/community-user-service');
 var testLogger = function(s) {};
@@ -21,7 +19,6 @@ describe('community-user-service', function() {
       communityUserService = communityUserServiceFactory(
         queryMock,
         recordServiceMock,
-        promise,
         testLogger
       );
     });
@@ -63,7 +60,8 @@ describe('community-user-service', function() {
     });
 
     it('Expect promise rejection when queryMock rejects', function(done) {
-      queryMock.reset().rejects('an error has occured');
+      queryMock.reset();
+      queryMock.rejects('an error has occured');
       communityUserService.deleteCommunityUser('theUserName').then(function(res) {
         expect(true).to.be.false;
         done();
@@ -71,13 +69,14 @@ describe('community-user-service', function() {
         expect(recordServiceMock.deleteRecord.called).to.be.false;
         expect(recordServiceMock.upsertRecord.called).to.be.false;
         expect(queryMock.called).to.be.true;
-        expect(reason.message).to.contain('an error has occured');
+        expect(reason.toString()).to.contain('an error has occured');
         done();
       });
     });
 
     it('Expect promise rejection when recordServiceMock.upsertRecord rejects', function(done) {
-      recordServiceMock.upsertRecord.reset().rejects('an error has occured');
+      recordServiceMock.upsertRecord.reset();
+      recordServiceMock.upsertRecord.rejects('an error has occured');
       communityUserService.deleteCommunityUser('theUserName').then(function(res) {
         expect(true).to.be.false;
         done();
@@ -85,13 +84,14 @@ describe('community-user-service', function() {
         expect(recordServiceMock.deleteRecord.called).to.be.false;
         expect(recordServiceMock.upsertRecord.called).to.be.true;
         expect(queryMock.called).to.be.true;
-        expect(reason.message).to.be.equal('an error has occured');
+        expect(reason.toString()).to.be.equal('an error has occured');
         done();
       });
     });
 
     it('Expect promise rejection when recordServiceMock.deleteRecord rejects', function(done) {
-      recordServiceMock.deleteRecord.reset().rejects('an error has occured');
+      recordServiceMock.deleteRecord.reset();
+      recordServiceMock.deleteRecord.rejects('an error has occured');
       communityUserService.deleteCommunityUser('theUserName').then(function(res) {
         expect(true).to.be.false;
         done();
@@ -99,7 +99,7 @@ describe('community-user-service', function() {
         expect(recordServiceMock.deleteRecord.called).to.be.true;
         expect(recordServiceMock.upsertRecord.called).to.be.true;
         expect(queryMock.called).to.be.true;
-        expect(reason.message).to.be.equal('an error has occured');
+        expect(reason.toString()).to.be.equal('an error has occured');
         done();
       });
     });

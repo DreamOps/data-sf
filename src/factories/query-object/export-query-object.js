@@ -5,7 +5,7 @@
  * @param {function} query - query-service dependency provided.
  * @return {function} query-object-factory - Constructs QueryObject instances.
  */
-module.exports = function(QueryObject, query, promise) {
+module.exports = function(QueryObject, query) {
   /**
    * ExportQueryObject inherits from QueryObject.
    * Uses the bulk API to retrieve the records.
@@ -30,6 +30,8 @@ module.exports = function(QueryObject, query, promise) {
         delete record[mapping.sourceColumn];
       } else if (mapping.value) {
         record[mapping.destColumn] = mapping.value;
+      } else if (mapping.deleteColumn) {
+        delete record[mapping.deleteColumn];
       }
     };
   };
@@ -55,20 +57,23 @@ module.exports = function(QueryObject, query, promise) {
    * @return {object} The queryRecords for the resulting json file.
    */
   ExportQueryObject.prototype.exportRecordTypes = function() {
-    var deferred = new promise.Deferred();
     var self = this;
-    query(getRecordTypeQuery(this.getType())).then(function(results) {
-      deferred.resolve(results.reduce(function(total, result) {
-        total[result.Id] = self.createRecordTypeQueryObject(result.Name);
-        return total;
-      }, {}));
+    return query(getRecordTypeQuery(self.getType())).then(results => {
+      return results.reduce((total, result) => {
+          total[result.Id] = self.createRecordTypeQueryObject(result.Name);
+          return total;
+      }, {});
     });
-    return deferred.promise;
   };
+
+  function encodeRecordTypeName(recordTypeName) {
+    // period in record type name interferes with variable syntax
+    return recordTypeName.replace(/\./g, '*');
+  }
 
   ExportQueryObject.prototype.createRecordTypeQueryObject = function(name) {
     var queryString = getRecordTypeQuery(this.getType(), name);
-    return {variable: name + 'RT', query: queryString};
+    return {variable: encodeRecordTypeName(name) + 'RT', query: queryString};
   };
 
   /**
@@ -78,16 +83,11 @@ module.exports = function(QueryObject, query, promise) {
    * @return {object} The queryRecords for the resulting json file.
    */
   ExportQueryObject.prototype.doQuery = function() {
-    var deferred = new promise.Deferred();
     var self = this;
-    promise.all([this.queryForRecords(), this.exportRecordTypes()]).then(function(results) {
+    return Promise.all([self.queryForRecords(), self.exportRecordTypes()]).then(results => {
       self.setRecords(results[0], results[1]);
       if (results[1]) { self.setQueries(results[1]); }
-      deferred.resolve();
-    }, function(err) {
-      deferred.reject(err);
     });
-    return deferred.promise;
   };
 
   ExportQueryObject.prototype.setQueries = function(queries) {

@@ -1,6 +1,4 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var environmentServiceFactory = require('./../../src/services/environment-service');
 
@@ -18,7 +16,7 @@ describe('environment-service', function() {
         formatRecords: sinon.stub().returns(results)
       }];
       var queryMock = sinon.stub().returns(queryObjectsMock);
-      var environment = environmentServiceFactory(queryMock, promise);
+      var environment = environmentServiceFactory(queryMock);
       environment.buildEnvironment([{
         variable: 'someVariable',
         query: 'SELECT Id FROM SomeVariable__c'
@@ -56,7 +54,7 @@ describe('environment-service', function() {
         }
       }];
       var queryMock = sinon.stub().returns(queryObjectsMock);
-      var environment = environmentServiceFactory(queryMock, promise);
+      var environment = environmentServiceFactory(queryMock);
       environment.buildEnvironment([{
         variable: 'someVariable',
         query: 'SELECT Id FROM SomeVariable__c'
@@ -94,7 +92,7 @@ describe('environment-service', function() {
         }
       }];
       var queryMock = sinon.stub().returns(queryObjectsMock);
-      var environment = environmentServiceFactory(queryMock, promise);
+      var environment = environmentServiceFactory(queryMock);
       environment.buildEnvironment([{
         variable: 'someVariable',
         query: 'SELECT Id FROM SomeVariable__c'
@@ -122,7 +120,7 @@ describe('environment-service', function() {
         doQuery: sinon.stub().rejects(reason)
       }];
       var queryMock = sinon.stub().returns(queryObjMock);
-      var environment = environmentServiceFactory(queryMock, promise);
+      var environment = environmentServiceFactory(queryMock);
       environment.buildEnvironment([{
         variable: 'someVariable',
         query: 'SELECT Id FROM SomeVariable__c'
@@ -132,9 +130,9 @@ describe('environment-service', function() {
       }]).then(function(actualResult) {
         expect(false).to.be.true;
         done();
-      }, function(actualReason) {
+      }).catch(actualReason => {
         expect(queryMock.called).to.be.true;
-        expect(actualReason.message).to.be.equal(reason);
+        expect(actualReason.toString()).to.be.equal(reason);
         done();
       });
     });

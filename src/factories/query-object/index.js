@@ -3,12 +3,11 @@
  *
  * @param {function} query - query-service dependency provided.
  * @param {function} bulkQuery - bulk-query-service dependency provided.
- * @param {object} promise - promise dependency provided.
  * @return {function} query-object-factory - Constructs QueryObject instances.
  */
-module.exports = function(query, bulkQuery, promise) {
-  QueryObject = require('./query-object')(query, promise);
-  ExportQueryObject = require('./export-query-object')(QueryObject, query, promise);
+module.exports = function(query, bulkQuery) {
+  QueryObject = require('./query-object')(query);
+  ExportQueryObject = require('./export-query-object')(QueryObject, query);
   BulkQueryObject = require('./bulk-query-object')(ExportQueryObject, bulkQuery);
   /**
    * Factory function for QueryObjects

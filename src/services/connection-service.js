@@ -2,34 +2,33 @@
 * Connects JSforce to the configured server.
 *
 * @param {object} jsforce - Dependency on jsforce provided.
-* @param {Promise} promise - Dependency on Promise library provided.
 * @param {object} config - Configuration (username, password, url, or instanceUrl, jwt) provided.
 * @return {function} Call this function to connect to SF through jsforce.
 */
-module.exports = function(jsforce, promise, config) {
+module.exports = function(jsforce, config) {
   var _loggedInConnection;
   var connect;
 
   if (config.instanceUrl && config.jwt) {
     connect = function() {
-      var deferred = new promise.Deferred();
-      var conn = new jsforce.Connection();
-      conn.initialize({
-        instanceUrl: config.instanceUrl,
-        accessToken: config.jwt
+      return new Promise((resolve, reject) => {
+        var conn = new jsforce.Connection();
+        conn.initialize({
+          instanceUrl: config.instanceUrl,
+          accessToken: config.jwt
+        });
+        resolve(conn);
       });
-      deferred.resolve(conn);
-      return deferred.promise;
     };
   } else {
     connect = function() {
-      var deferred = new promise.Deferred();
-      var conn = new jsforce.Connection({loginUrl: config.url});
-      conn.login(config.username, config.password, function(err, res) {
-        if (err) { return deferred.reject(err); }
-        deferred.resolve(conn);
+      return new Promise((resolve, reject) => {
+        var conn = new jsforce.Connection({loginUrl: config.url});
+        conn.login(config.username, config.password, function(err, res) {
+          if (err) { return reject(err); }
+          resolve(conn);
+        });
       });
-      return deferred.promise;
     };
   }
 
@@ -39,17 +38,13 @@ module.exports = function(jsforce, promise, config) {
    * @return {object} Promise that resolves with the connection when the connection finishes.
    */
   return function() {
-    var deferred = new promise.Deferred();
     if (_loggedInConnection === undefined) {
-      connect().then(function(conn) {
+      return connect().then(conn => {
         _loggedInConnection = conn;
-        deferred.resolve(_loggedInConnection);
-      }, function(err) {
-        deferred.reject(err);
+        return conn;
       });
     } else {
-      deferred.resolve(_loggedInConnection);
+      return Promise.resolve(_loggedInConnection);
     }
-    return deferred.promise;
   };
 };

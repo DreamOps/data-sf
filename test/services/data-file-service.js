@@ -1,44 +1,42 @@
 var sinon = require('sinon');
-var promise = require('promised-io/promise');
-require('sinon-as-promised');
 var expect = require('chai').expect;
 var dataFileServiceFactory = require('./../../src/services/data-file-service');
 
 describe('data-file-service', function() {
 
   var dataFileJson = {
-    'extId': 'ExternalId__c',
+    'extId': 'NU__ExternalId__c',
     'queries': [
       {
           'variable': 'Entity',
-          'query': 'SELECT Id, Name FROM Entity__c WHERE Name LIKE \'Inter%\''
+          'query': 'SELECT Id, Name FROM NU__Entity__c WHERE Name LIKE \'Inter%\''
       },
       {
           'variable': 'GlAccount',
-          'query': 'SELECT Id, Name FROM GLAccount__c WHERE Name LIKE \'01-%\' LIMIT 1'
+          'query': 'SELECT Id, Name FROM NU__GLAccount__c WHERE Name LIKE \'01-%\' LIMIT 1'
       }
     ],
     'records': {
-      'Event__c': [
+      'NU__Event__c': [
         {
           'Name': 'Test Event',
-          'ShortName__c': 'TE',
-          'Status__c': 'Active',
-          'Entity__c': '${Entity.Id}',
-          'StartDate__c': '2016-04-22T08:00:00Z',
-          'EndDate__c': '2016-04-25T08:00:00Z',
-          'ExternalId__c': 'TestEvent'
+          'NU__ShortName__c': 'TE',
+          'NU__Status__c': 'Active',
+          'NU__Entity__c': '${Entity.Id}',
+          'NU__StartDate__c': '2016-04-22T08:00:00Z',
+          'NU__EndDate__c': '2016-04-25T08:00:00Z',
+          'NU__ExternalId__c': 'TestEvent'
         }
       ],
-      'Product__c': [
+      'NU__Product__c': [
         {
           'Name': 'Test Donation Product',
-          'Entity__c': '${Entity.Id}',
-          'DisplayOrder__c': 1,
-          'QuantityMax__c': 1,
-          'ListPrice__c': 10.00,
-          'RevenueGLAccount__c': '${GlAccount.Id}',
-          'ExternalId__c': 'TestDonationProduct'
+          'NU__Entity__c': '${Entity.Id}',
+          'NU__DisplayOrder__c': 1,
+          'NU__QuantityMax__c': 1,
+          'NU__ListPrice__c': 10.00,
+          'NU__RevenueGLAccount__c': '${GlAccount.Id}',
+          'NU__ExternalId__c': 'TestDonationProduct'
         }
       ]
     },
@@ -46,8 +44,8 @@ describe('data-file-service', function() {
       {
         'type': 'ApexScript',
         'body': [
-          'List<Event__c> events = [SELECT Id FROM Event__c WHERE ExternalId__c=\'TestEvent\'];',
-          'List<Product__c> products = [SELECT Id FROM Product__c WHERE ExternalId__c];',
+          'List<NU__Event__c> events = [SELECT Id FROM NU__Event__c WHERE NU__ExternalId__c=\'TestEvent\'];',
+          'List<NU__Product__c> products = [SELECT Id FROM NU__Product__c WHERE NU__ExternalId__c];',
           'delete products;',
           'delete events;'
         ]
@@ -55,8 +53,8 @@ describe('data-file-service', function() {
       {
         'type': 'ApexScript',
         'body': [
-          'List<Event__c> events = [SELECT Id FROM Event__c WHERE ExternalId__c=\'TestEvent\'];',
-          'List<Product__c> products = [SELECT Id FROM Product__c WHERE ExternalId__c];',
+          'List<NU__Event__c> events = [SELECT Id FROM NU__Event__c WHERE NU__ExternalId__c=\'TestEvent\'];',
+          'List<NU__Product__c> products = [SELECT Id FROM NU__Product__c WHERE NU__ExternalId__c];',
           'delete products;',
           'delete events;'
         ]
@@ -74,13 +72,13 @@ describe('data-file-service', function() {
         replaceVariables: sinon.stub().returnsArg(0)
       };
       recordServiceMock = {
-        insertRecords: sinon.stub().resolves({})
+        insertRecords: sinon.stub().resolves({}),
+        upsertRecords: sinon.stub().resolves({})
       };
       dataFileService = dataFileServiceFactory(
         environmentMock,
         recordServiceMock,
-        null,
-        promise
+        null
       );
     });
 
@@ -98,34 +96,121 @@ describe('data-file-service', function() {
         expect(environmentMock.replaceVariables.calledTwice).to.be.true;
         var firstCall = environmentMock.replaceVariables.getCall(0);
         var secondCall = environmentMock.replaceVariables.getCall(1);
-        expect(firstCall.calledWith(dataFileJson.records.Event__c, {})).to.be.true;
-        expect(secondCall.calledWith(dataFileJson.records.Product__c, {})).to.be.true;
+        expect(firstCall.calledWith(dataFileJson.records.NU__Event__c, {})).to.be.true;
+        expect(secondCall.calledWith(dataFileJson.records.NU__Product__c, {})).to.be.true;
         done();
       });
     });
 
-    it('Expect recordServiceMock.insertRecords called twice', function(done) {
+    it('Expect recordServiceMock.upsertRecords called twice', function(done) {
       dataFileService.processData(dataFileJson).then(function() {
-        expect(recordServiceMock.insertRecords.calledTwice).to.be.true;
-        var firstCall = recordServiceMock.insertRecords.getCall(0);
-        var secondCall = recordServiceMock.insertRecords.getCall(1);
+        expect(recordServiceMock.upsertRecords.calledTwice).to.be.true;
+        var firstCall = recordServiceMock.upsertRecords.getCall(0);
+        var secondCall = recordServiceMock.upsertRecords.getCall(1);
         expect(
-          firstCall.calledWith('Event__c', dataFileJson.records.Event__c, dataFileJson.extId)
+          firstCall.calledWith('NU__Event__c', dataFileJson.records.NU__Event__c, dataFileJson.extId)
         ).to.be.true;
         expect(
-          secondCall.calledWith('Product__c', dataFileJson.records.Product__c, dataFileJson.extId)
+          secondCall.calledWith('NU__Product__c', dataFileJson.records.NU__Product__c, dataFileJson.extId)
         ).to.be.true;
         done();
       });
     });
 
     it('Expect promise rejection when buildEnvironment rejects', function(done) {
-      environmentMock.buildEnvironment.reset().rejects('this is an error');
+      environmentMock.buildEnvironment.reset();
+      environmentMock.buildEnvironment.rejects('this is an error');
       dataFileService.processData(dataFileJson).then(function() {
         expect(false).to.be.true;
         done();
       }, function(reason) {
-        expect(reason.message).to.be.equal('this is an error');
+        expect(reason.toString()).to.be.equal('this is an error');
+        expect(environmentMock.buildEnvironment.called).to.be.true;
+        expect(environmentMock.replaceVariables.called).to.be.false;
+        expect(recordServiceMock.insertRecords.called).to.be.false;
+        done();
+      });
+    });
+
+    it('Expect promise rejection when upsertRecords rejects', function(done) {
+      recordServiceMock.upsertRecords.reset();
+      recordServiceMock.upsertRecords.rejects('this is an error');
+      dataFileService.processData(dataFileJson).then(function() {
+        expect(false).to.be.true;
+        done();
+      }, function(reason) {
+        expect(reason.toString()).to.be.equal('this is an error');
+        expect(environmentMock.buildEnvironment.called).to.be.true;
+        expect(environmentMock.replaceVariables.called).to.be.true;
+        expect(recordServiceMock.upsertRecords.called).to.be.true;
+        done();
+      });
+    });
+  });
+
+  describe('processDataInsert', function() {
+    var dataFileService;
+    var environmentMock;
+    var recordServiceMock;
+    beforeEach(function() {
+      environmentMock = {
+        buildEnvironment: sinon.stub().resolves({}),
+        replaceVariables: sinon.stub().returnsArg(0)
+      };
+      recordServiceMock = {
+        insertRecords: sinon.stub().resolves({}),
+        upsertRecords: sinon.stub().resolves({})
+      };
+      dataFileService = dataFileServiceFactory(
+        environmentMock,
+        recordServiceMock,
+        null
+      );
+    });
+
+    it('Expect environmentMock.buildEnvironment called', function(done) {
+      dataFileService.processDataInsert(dataFileJson).then(function() {
+        expect(
+          environmentMock.buildEnvironment.calledWith(dataFileJson.queries)
+        ).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect environmentMock.replaceVariables called twice', function(done) {
+      dataFileService.processDataInsert(dataFileJson).then(function() {
+        expect(environmentMock.replaceVariables.calledTwice).to.be.true;
+        var firstCall = environmentMock.replaceVariables.getCall(0);
+        var secondCall = environmentMock.replaceVariables.getCall(1);
+        expect(firstCall.calledWith(dataFileJson.records.NU__Event__c, {})).to.be.true;
+        expect(secondCall.calledWith(dataFileJson.records.NU__Product__c, {})).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect recordServiceMock.insertRecords called twice', function(done) {
+      dataFileService.processDataInsert(dataFileJson).then(function() {
+        expect(recordServiceMock.insertRecords.calledTwice).to.be.true;
+        var firstCall = recordServiceMock.insertRecords.getCall(0);
+        var secondCall = recordServiceMock.insertRecords.getCall(1);
+        expect(
+          firstCall.calledWith('NU__Event__c', dataFileJson.records.NU__Event__c, dataFileJson.extId)
+        ).to.be.true;
+        expect(
+          secondCall.calledWith('NU__Product__c', dataFileJson.records.NU__Product__c, dataFileJson.extId)
+        ).to.be.true;
+        done();
+      });
+    });
+
+    it('Expect promise rejection when buildEnvironment rejects', function(done) {
+      environmentMock.buildEnvironment.reset();
+      environmentMock.buildEnvironment.rejects('this is an error');
+      dataFileService.processDataInsert(dataFileJson).then(function() {
+        expect(false).to.be.true;
+        done();
+      }, function(reason) {
+        expect(reason.toString()).to.be.equal('this is an error');
         expect(environmentMock.buildEnvironment.called).to.be.true;
         expect(environmentMock.replaceVariables.called).to.be.false;
         expect(recordServiceMock.insertRecords.called).to.be.false;
@@ -134,12 +219,13 @@ describe('data-file-service', function() {
     });
 
     it('Expect promise rejection when insertRecords rejects', function(done) {
-      recordServiceMock.insertRecords.reset().rejects('this is an error');
-      dataFileService.processData(dataFileJson).then(function() {
+      recordServiceMock.insertRecords.reset();
+      recordServiceMock.insertRecords.rejects('this is an error');
+      dataFileService.processDataInsert(dataFileJson).then(function() {
         expect(false).to.be.true;
         done();
       }, function(reason) {
-        expect(reason.message).to.be.equal('this is an error');
+        expect(reason.toString()).to.be.equal('this is an error');
         expect(environmentMock.buildEnvironment.called).to.be.true;
         expect(environmentMock.replaceVariables.called).to.be.true;
         expect(recordServiceMock.insertRecords.called).to.be.true;
@@ -156,8 +242,7 @@ describe('data-file-service', function() {
       dataFileService = dataFileServiceFactory(
         null,
         null,
-        executeMock,
-        promise
+        executeMock
       );
     });
 
@@ -169,12 +254,13 @@ describe('data-file-service', function() {
     });
 
     it('Expect promise rejection when executeMock rejects', function(done) {
-      executeMock.reset().rejects('error');
+      executeMock.reset();
+      executeMock.rejects('error');
       dataFileService.cleanData(dataFileJson.cleaners).then(function() {
         expect(false).to.be.true;
         done();
       }, function(reason) {
-        expect(reason.message).to.be.equal('error');
+        expect(reason.toString()).to.be.equal('error');
         expect(executeMock.called).to.be.true;
         done();
       });
@@ -199,7 +285,6 @@ describe('data-file-service', function() {
         writeFile: sinon.stub()
       };
       dataFileService = dataFileServiceFactory(
-        null,
         null,
         null,
         null,
@@ -228,6 +313,18 @@ describe('data-file-service', function() {
       );
       var jsonArg = JSON.parse(fsMock.writeFile.getCall(0).args[1]);
       expect(jsonArg.extId).to.be.eq(extId);
+    });
+
+    it('Expect extId default set', function() {
+      dataFileService.writeDataFile(
+        records,
+        destinationFile,
+        type,
+        null,
+        queries
+      );
+      var jsonArg = JSON.parse(fsMock.writeFile.getCall(0).args[1]);
+      expect(jsonArg.extId).to.be.eq('NU__ExternalID__c');
     });
 
     it('Expect queries default set', function() {
@@ -272,7 +369,6 @@ describe('data-file-service', function() {
         writeFile: sinon.stub()
       };
       dataFileService = dataFileServiceFactory(
-        null,
         null,
         null,
         null,

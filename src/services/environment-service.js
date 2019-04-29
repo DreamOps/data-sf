@@ -2,10 +2,9 @@
  * Factory function for environment-service.
  *
  * @param {function} queryObjectFactory - factory for query objects.
- * @param {Promise} promise - promise library dependency injection.
  * @return {object} environment-service provides functions for building an environment via queries.
  */
-module.exports = function(queryObjectFactory, promise) {
+module.exports = function(queryObjectFactory) {
   var formatter = function(records) {
     return (records && records.length === 1) ? records[0] : records;
   };
@@ -23,21 +22,23 @@ module.exports = function(queryObjectFactory, promise) {
    *                     variable properties, and whose values are the results of the queries.
    */
   var buildEnvironment = function(queryObjects) {
-    var deferred = new promise.Deferred();
-    var variables = {};
-    queryObjects = queryObjectFactory(queryObjects);
-    var promises = queryObjects.map(function(q) {
-      return q.doQuery();
-    });
-    promise.all(promises).then(function() {
-      queryObjects.forEach(function(q) {
-        variables[q.getName()] = q.formatRecords(formatter);
+    return new Promise((resolve, reject) => {
+      var variables = {};
+      queryObjects = queryObjectFactory(queryObjects);
+      var promises = queryObjects.map(q => {
+        return q.doQuery();
       });
-      deferred.resolve(variables);
-    }, function(err) {
-      deferred.reject(err);
+      Promise.all(promises)
+        .then(() => {
+          queryObjects.forEach(q => {
+            variables[q.getName()] = q.formatRecords(formatter);
+          });
+          resolve(variables);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
-    return deferred.promise;
   };
 
   /**
