@@ -201,32 +201,32 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('mapping', 'Generates a mapping for an org.', function(path) {
-    if (arguments.length < 1) {
-      handleError(this.name + ' Usage: mapping:path/to/destination/file.json');
-    }
+  // grunt.registerTask('mapping', 'Generates a mapping for an org.', function(path) {
+  //   if (arguments.length < 1) {
+  //     handleError(this.name + ' Usage: mapping:path/to/destination/file.json');
+  //   }
 
-    var done = this.async();
-    var mappingService = getContainer().get('mapping-service');
+  //   var done = this.async();
+  //   var mappingService = getContainer().get('mapping-service');
 
-    mappingService.map(path).then(function() {
-      done();
-    }, handleError);
-  });
+  //   mappingService.map(path).then(function() {
+  //     done();
+  //   }, handleError);
+  // });
 
-  grunt.registerTask('obfuscateEmails', 'Pass the directory for file to have emails obfuscated.', function(path) {
-    if (arguments.length === 0) {
-      handleError(this.name + ' Usage: obfuscateEmails:path/to/data/');
-    }
+  // grunt.registerTask('obfuscateEmails', 'Pass the directory for file to have emails obfuscated.', function(path) {
+  //   if (arguments.length === 0) {
+  //     handleError(this.name + ' Usage: obfuscateEmails:path/to/data/');
+  //   }
 
-    var container = getContainer();
-    var dataFileService = container.get('data-file-service');
+  //   var container = getContainer();
+  //   var dataFileService = container.get('data-file-service');
 
-    var data = grunt.file.recurse(path, function(abspath, rootdir, subdir, filename) {
-      var rawData = grunt.file.readJSON(abspath);
-      var newRawData = dataFileService.obfuscateEmails(rawData);
-      var fileData = JSON.stringify(newRawData, null, 2);
-      grunt.file.write(abspath, fileData);
-    });
-  });
+  //   var data = grunt.file.recurse(path, function(abspath, rootdir, subdir, filename) {
+  //     var rawData = grunt.file.readJSON(abspath);
+  //     var newRawData = dataFileService.obfuscateEmails(rawData);
+  //     var fileData = JSON.stringify(newRawData, null, 2);
+  //     grunt.file.write(abspath, fileData);
+  //   });
+  // });
 };
