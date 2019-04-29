@@ -22,7 +22,7 @@ var bulkRecordService = require('./services/bulk-record-service');
 var exportService = require('./services/export-service');
 var queryObjectFactory = require('./factories/query-object');
 var bulkQueryService = require('./services/bulk-query-service');
-var jsforcePartnerService = require('./services/jsforce-partner-service.js');
+// var jsforcePartnerService = require('./services/jsforce-partner-service.js');
 var mappingService = require('./services/mapping-service.js');
 // var SOAP = require('../node_modules/jsforce/lib/soap');
 

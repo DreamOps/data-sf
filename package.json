@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "grunt": "~1.0.4",
-    "jsforce": "~1.9.1",
+    "jsforce": "1.8.5",
     "kontainer-di": "~0.9.9",
     "lodash": "^4.17.11",
     "readline-sync": "^1.4.5"
